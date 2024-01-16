@@ -26,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
         title="Log In" 
         onPress={() => {
           // Handle the login logic here
-          navigation.navigate('Main');
+          navigation.navigate('MainDashboard');
         }} 
       />
       <Text 
