@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const MainDashboard = ({ navigation }) => {
-  const [tasks, setTasks] = useState([
+  // Initialize selectedDate with today's date
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+const onChangeDate = (event, selectedDate) => {
+  const currentDate = selectedDate || selectedDate; // Use the selectedDate if provided
+  setShowDatePicker(Platform.OS === 'ios'); // Only necessary if you want to keep the picker open on iOS
+  setSelectedDate(currentDate);
+};
+
+  
+const [tasks, setTasks] = useState([
     { id: 1, name: 'Task 1', completed: false },
     { id: 2, name: 'Task 2', completed: false },
     // ... more tasks
-  ]);
+]);
 
   // Function to handle task completion toggle
   const toggleTaskCompletion = (taskId) => {
@@ -20,15 +32,19 @@ const MainDashboard = ({ navigation }) => {
     // Logic to handle task selection
   };
 
+    // Function to show the date picker
+    const showDatePickerModal = () => {
+        setShowDatePicker(true);
+      };
+    
+      // Function to hide the date picker
+      const hideDatePicker = () => {
+        setShowDatePicker(false);
+      };
+
   return (
     <View style={styles.container}>
       <View style={styles.dropdownMenu}>
-        <TouchableOpacity onPress={() => {/* Logic for Today */}}>
-          <Text>Today</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => {/* Logic for Calendar */}}>
-          <Text>Calendar</Text>
-        </TouchableOpacity>
         <TouchableOpacity onPress={() => {/* Logic for Profile */}}>
           <Text>Profile</Text>
         </TouchableOpacity>
@@ -41,7 +57,42 @@ const MainDashboard = ({ navigation }) => {
       <TouchableOpacity style={styles.addButton} onPress={() => {/* Logic to add a task */}}>
         <Text>Spin!</Text>
       </TouchableOpacity>
+    
+      <TouchableOpacity onPress={showDatePickerModal} style={styles.dateDisplay}>
+        <Text style={styles.dateText}>
+          {selectedDate.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </Text>
+      </TouchableOpacity>
 
+      <Modal
+        visible={showDatePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.datePickerModal}>
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="spinner" // 'spinner' provides a consistent look across platforms
+              onChange={onChangeDate}
+            />
+            {/* Buttons or touchable areas to confirm or cancel the date selection */}
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={() => setShowDatePicker(false)}
+            >
+              <Text style={styles.confirmButtonText}>Confirm</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+            
       <View style={styles.taskList}>
         {tasks.map((task) => (
           <TouchableOpacity 
@@ -133,6 +184,42 @@ const styles = StyleSheet.create({
       color: '#fff',
       fontSize: 16,
       fontWeight: 'bold',
+    },
+    dateText: {
+      alignSelf: 'center',
+      alignItems: 'center',
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+      },
+      datePickerModal: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+    },
+    confirmButton: {
+    marginTop: 20,
+    backgroundColor: '#2196F3',
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2
+    },
+    confirmButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center'
     },
     // Add styles for the modal and other components as needed
   });
