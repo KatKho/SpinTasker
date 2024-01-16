@@ -2,11 +2,17 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 const MainDashboard = ({ navigation }) => {
-  const [tasks, setTasks] = useState([
+const today = new Date();
+const formattedDate = today.toLocaleDateString('en-US', {
+month: 'long',
+day: 'numeric',
+year: 'numeric',
+});
+const [tasks, setTasks] = useState([
     { id: 1, name: 'Task 1', completed: false },
     { id: 2, name: 'Task 2', completed: false },
     // ... more tasks
-  ]);
+]);
 
   // Function to handle task completion toggle
   const toggleTaskCompletion = (taskId) => {
@@ -23,9 +29,6 @@ const MainDashboard = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.dropdownMenu}>
-        <TouchableOpacity onPress={() => {/* Logic for Today */}}>
-          <Text>Today</Text>
-        </TouchableOpacity>
         <TouchableOpacity onPress={() => {/* Logic for Calendar */}}>
           <Text>Calendar</Text>
         </TouchableOpacity>
@@ -38,11 +41,13 @@ const MainDashboard = ({ navigation }) => {
         {/* Add your wheel component here */}
       </View>
 
+
       <TouchableOpacity style={styles.addButton} onPress={() => {/* Logic to add a task */}}>
         <Text>Spin!</Text>
       </TouchableOpacity>
 
       <View style={styles.taskList}>
+      <Text style={styles.dateText}>{formattedDate}</Text>
         {tasks.map((task) => (
           <TouchableOpacity 
             key={task.id} 
@@ -134,6 +139,10 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: 'bold',
     },
+    dateText: {
+      alignSelf: 'center',
+      alignItems: 'center',
+    }
     // Add styles for the modal and other components as needed
   });
   
