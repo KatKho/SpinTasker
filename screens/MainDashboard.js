@@ -100,6 +100,8 @@ const handleDeleteTask = () => {
     });
     setCurrentTask(null);
     setIsEditModalVisible(false);
+    setTaskName('');
+    setTaskDescription('');
   };
 
   // Function to handle task update
@@ -116,6 +118,8 @@ const handleDeleteTask = () => {
     });
     setCurrentTask(null);
     setIsEditModalVisible(false);
+    setTaskName('');
+    setTaskDescription('');
   };
 
   useEffect(() => {
