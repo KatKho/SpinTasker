@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Platform, View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const MainDashboard = ({ navigation }) => {
-  // Initialize selectedDate with today's date
+  // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
@@ -11,26 +11,57 @@ const MainDashboard = ({ navigation }) => {
   const [taskDescription, setTaskDescription] = useState('');
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
-
-
-  const onChangeDate = (event, selectedDate) => {
-    if (selectedDate) { 
-      setSelectedDate(selectedDate);
-      setShowDatePicker(Platform.OS === 'ios'); // Hide the picker unless it's iOS
-    }
-  };
   
-const [tasks, setTasks] = useState([
-    { id: 1, name: 'Task 1', completed: false },
-    { id: 2, name: 'Task 2', completed: false },
-    // ... more tasks
-]);
+  // Initialize allTasks with an empty array
+  const [allTasks, setAllTasks] = useState([]); // You should fetch this from a database or storage
+
+  // Function to update displayed tasks based on the selected date
+  const updateDisplayedTasks = (newDate) => {
+    const filteredTasks = allTasks.filter(task => {
+      const taskDate = new Date(task.date);
+      return taskDate.toDateString() === newDate.toDateString();
+    });
+    setDisplayedTasks(filteredTasks); // Update the state to reflect the filtered tasks
+  };
+
+  // Initialize displayedTasks with the tasks for today
+  const [displayedTasks, setDisplayedTasks] = useState([]);
+
+  // Function to handle date change
+  const onChangeDate = (event, newSelectedDate) => {
+    const currentDate = newSelectedDate || selectedDate;
+    setShowDatePicker(Platform.OS === 'ios');
+    setSelectedDate(currentDate);
+    updateDisplayedTasks(currentDate);
+  };
+
+  // Function to add a task
+  const addTask = () => {
+    const newTask = {
+      id: Math.random().toString(36).substr(2, 9), // Generating a unique ID
+      name: taskName,
+      description: taskDescription,
+      completed: false,
+      date: selectedDate.toISOString(),
+    };
+    setAllTasks(prevTasks => {
+      const updatedTasks = [...prevTasks, newTask];
+      updateDisplayedTasks(selectedDate); // Update displayed tasks
+      return updatedTasks;
+    });
+    setTaskName('');
+    setTaskDescription('');
+    setIsTaskModalVisible(false);
+  };
 
   // Function to handle task completion toggle
   const toggleTaskCompletion = (taskId) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    setAllTasks(prevTasks => prevTasks.map(task => {
+      if (task.id === taskId) {
+        return { ...task, completed: !task.completed };
+      }
+      return task;
+    }));
   };
 
   // Function to handle task selection from the wheel
@@ -52,19 +83,6 @@ const [tasks, setTasks] = useState([
     setIsTaskModalVisible(!isTaskModalVisible);
     };
 
-    const addTask = () => {
-        const newTask = {
-          id: Date.now(), // unique ID for the task
-          name: taskName,
-          description: taskDescription,
-          completed: false,
-          date: selectedDate,
-        };
-        setTasks([...tasks, newTask]);
-        setTaskName('');
-        setTaskDescription('');
-        setIsTaskModalVisible(false);
-      };
       
       const showEditModal = (task) => {
         setCurrentTask(task);
@@ -73,29 +91,37 @@ const [tasks, setTasks] = useState([
         setIsEditModalVisible(true);
       };
       
-      const handleDeleteTask = () => {
-        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== currentTask.id));
-        // Reset the state and close the modal
-        setCurrentTask(null);
-        setTaskName('');
-        setTaskDescription('');
-        setIsEditModalVisible(false);
-      };
-      
-      const handleUpdateTask = () => {
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task.id === currentTask.id
-              ? { ...task, name: taskName, description: taskDescription }
-              : task
-          )
-        );
-        // Reset the state and close the modal
-        setCurrentTask(null);
-        setTaskName('');
-        setTaskDescription('');
-        setIsEditModalVisible(false);
-      };
+// Function to delete a task
+const handleDeleteTask = () => {
+    setAllTasks(prevTasks => {
+      const updatedTasks = prevTasks.filter(task => task.id !== currentTask.id);
+      updateDisplayedTasks(selectedDate); // Update displayed tasks
+      return updatedTasks;
+    });
+    setCurrentTask(null);
+    setIsEditModalVisible(false);
+  };
+
+  // Function to handle task update
+  const handleUpdateTask = () => {
+    setAllTasks(prevTasks => {
+      const updatedTasks = prevTasks.map(task => {
+        if (task.id === currentTask.id) {
+          return { ...task, name: taskName, description: taskDescription };
+        }
+        return task;
+      });
+      updateDisplayedTasks(selectedDate); // Update displayed tasks
+      return updatedTasks;
+    });
+    setCurrentTask(null);
+    setIsEditModalVisible(false);
+  };
+
+  useEffect(() => {
+    updateDisplayedTasks(selectedDate);
+  }, [selectedDate, allTasks]);
+
 
 
   return (
@@ -150,7 +176,7 @@ const [tasks, setTasks] = useState([
       </Modal>
             
       <View style={styles.taskList}>
-        {tasks.map((task) => (
+        {displayedTasks.map((task) => (
           <TouchableOpacity 
             key={task.id} 
             style={styles.taskItem}
