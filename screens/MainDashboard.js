@@ -9,6 +9,8 @@ const MainDashboard = ({ navigation }) => {
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [currentTask, setCurrentTask] = useState(null);
 
 
   const onChangeDate = (event, selectedDate) => {
@@ -64,6 +66,37 @@ const [tasks, setTasks] = useState([
         setIsTaskModalVisible(false);
       };
       
+      const showEditModal = (task) => {
+        setCurrentTask(task);
+        setTaskName(task.name);
+        setTaskDescription(task.description);
+        setIsEditModalVisible(true);
+      };
+      
+      const handleDeleteTask = () => {
+        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== currentTask.id));
+        // Reset the state and close the modal
+        setCurrentTask(null);
+        setTaskName('');
+        setTaskDescription('');
+        setIsEditModalVisible(false);
+      };
+      
+      const handleUpdateTask = () => {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === currentTask.id
+              ? { ...task, name: taskName, description: taskDescription }
+              : task
+          )
+        );
+        // Reset the state and close the modal
+        setCurrentTask(null);
+        setTaskName('');
+        setTaskDescription('');
+        setIsEditModalVisible(false);
+      };
+
 
   return (
     <View style={styles.container}>
@@ -126,9 +159,48 @@ const [tasks, setTasks] = useState([
             <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
               {task.name}
             </Text>
-            <TouchableOpacity onPress={() => {/* Logic for Edit */}}>
-              <Text>Edit</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => showEditModal(task)}>
+  <Text>Edit</Text>
+</TouchableOpacity>
+
+<Modal
+  visible={isEditModalVisible}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={() => setIsEditModalVisible(false)}
+>
+  <View style={styles.centeredView}>
+    <View style={styles.taskModal}>
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={taskName}
+        onChangeText={setTaskName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Description (optional)"
+        multiline
+        value={taskDescription}
+        onChangeText={setTaskDescription}
+      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleUpdateTask}
+        >
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDeleteTask}
+        >
+          <Text style={styles.deleteButtonText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
           </TouchableOpacity>
         ))}
       </View>
@@ -350,6 +422,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly', 
     marginTop: 20,
+  },
+
+  deleteButton: {
+    backgroundColor: '#d9534f', // Bootstrap danger red for delete button
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    // alignSelf: 'center', // You can remove alignSelf if you are using buttonContainer for positioning
+  },
+  
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   
   });
