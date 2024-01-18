@@ -1,30 +1,67 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Platform, View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const MainDashboard = ({ navigation }) => {
-  // Initialize selectedDate with today's date
+  // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-
-const onChangeDate = (event, selectedDate) => {
-  const currentDate = selectedDate || selectedDate; // Use the selectedDate if provided
-  setShowDatePicker(Platform.OS === 'ios'); // Only necessary if you want to keep the picker open on iOS
-  setSelectedDate(currentDate);
-};
-
+  const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
+  const [taskName, setTaskName] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [currentTask, setCurrentTask] = useState(null);
   
-const [tasks, setTasks] = useState([
-    { id: 1, name: 'Task 1', completed: false },
-    { id: 2, name: 'Task 2', completed: false },
-    // ... more tasks
-]);
+  // Initialize allTasks with an empty array
+  const [allTasks, setAllTasks] = useState([]); // You should fetch this from a database or storage
+
+  // Function to update displayed tasks based on the selected date
+  const updateDisplayedTasks = (newDate) => {
+    const filteredTasks = allTasks.filter(task => {
+      const taskDate = new Date(task.date);
+      return taskDate.toDateString() === newDate.toDateString();
+    });
+    setDisplayedTasks(filteredTasks); // Update the state to reflect the filtered tasks
+  };
+
+  // Initialize displayedTasks with the tasks for today
+  const [displayedTasks, setDisplayedTasks] = useState([]);
+
+  // Function to handle date change
+  const onChangeDate = (event, newSelectedDate) => {
+    const currentDate = newSelectedDate || selectedDate;
+    setShowDatePicker(Platform.OS === 'ios');
+    setSelectedDate(currentDate);
+    updateDisplayedTasks(currentDate);
+  };
+
+  // Function to add a task
+  const addTask = () => {
+    const newTask = {
+      id: Math.random().toString(36).substr(2, 9), // Generating a unique ID
+      name: taskName,
+      description: taskDescription,
+      completed: false,
+      date: selectedDate.toISOString(),
+    };
+    setAllTasks(prevTasks => {
+      const updatedTasks = [...prevTasks, newTask];
+      updateDisplayedTasks(selectedDate); // Update displayed tasks
+      return updatedTasks;
+    });
+    setTaskName('');
+    setTaskDescription('');
+    setIsTaskModalVisible(false);
+  };
 
   // Function to handle task completion toggle
   const toggleTaskCompletion = (taskId) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    setAllTasks(prevTasks => prevTasks.map(task => {
+      if (task.id === taskId) {
+        return { ...task, completed: !task.completed };
+      }
+      return task;
+    }));
   };
 
   // Function to handle task selection from the wheel
@@ -37,10 +74,59 @@ const [tasks, setTasks] = useState([
         setShowDatePicker(true);
       };
     
-      // Function to hide the date picker
-      const hideDatePicker = () => {
+    // Function to hide the date picker
+    const hideDatePicker = () => {
         setShowDatePicker(false);
+    };
+
+    const toggleTaskModal = () => {
+    setIsTaskModalVisible(!isTaskModalVisible);
+    };
+
+      
+      const showEditModal = (task) => {
+        setCurrentTask(task);
+        setTaskName(task.name);
+        setTaskDescription(task.description);
+        setIsEditModalVisible(true);
       };
+      
+// Function to delete a task
+const handleDeleteTask = () => {
+    setAllTasks(prevTasks => {
+      const updatedTasks = prevTasks.filter(task => task.id !== currentTask.id);
+      updateDisplayedTasks(selectedDate); // Update displayed tasks
+      return updatedTasks;
+    });
+    setCurrentTask(null);
+    setIsEditModalVisible(false);
+    setTaskName('');
+    setTaskDescription('');
+  };
+
+  // Function to handle task update
+  const handleUpdateTask = () => {
+    setAllTasks(prevTasks => {
+      const updatedTasks = prevTasks.map(task => {
+        if (task.id === currentTask.id) {
+          return { ...task, name: taskName, description: taskDescription };
+        }
+        return task;
+      });
+      updateDisplayedTasks(selectedDate); // Update displayed tasks
+      return updatedTasks;
+    });
+    setCurrentTask(null);
+    setIsEditModalVisible(false);
+    setTaskName('');
+    setTaskDescription('');
+  };
+
+  useEffect(() => {
+    updateDisplayedTasks(selectedDate);
+  }, [selectedDate, allTasks]);
+
+
 
   return (
     <View style={styles.container}>
@@ -79,10 +165,10 @@ const [tasks, setTasks] = useState([
             <DateTimePicker
               value={selectedDate}
               mode="date"
-              display="spinner" // 'spinner' provides a consistent look across platforms
+              display="spinner" 
+              textColor="black"
               onChange={onChangeDate}
             />
-            {/* Buttons or touchable areas to confirm or cancel the date selection */}
             <TouchableOpacity
               style={styles.confirmButton}
               onPress={() => setShowDatePicker(false)}
@@ -94,7 +180,7 @@ const [tasks, setTasks] = useState([
       </Modal>
             
       <View style={styles.taskList}>
-        {tasks.map((task) => (
+        {displayedTasks.map((task) => (
           <TouchableOpacity 
             key={task.id} 
             style={styles.taskItem}
@@ -103,19 +189,94 @@ const [tasks, setTasks] = useState([
             <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
               {task.name}
             </Text>
-            <TouchableOpacity onPress={() => {/* Logic for Edit */}}>
-              <Text>Edit</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => showEditModal(task)}>
+  <Text>Edit</Text>
+</TouchableOpacity>
+
+<Modal
+  visible={isEditModalVisible}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={() => setIsEditModalVisible(false)}
+>
+  <View style={styles.centeredView}>
+    <View style={styles.taskModal}>
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={taskName}
+        onChangeText={setTaskName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Description (optional)"
+        multiline
+        value={taskDescription}
+        onChangeText={setTaskDescription}
+      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleUpdateTask}
+        >
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDeleteTask}
+        >
+          <Text style={styles.deleteButtonText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
           </TouchableOpacity>
         ))}
       </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={() => {/* Logic to add a task */}}>
-        <Text>Add Task</Text>
+      <TouchableOpacity style={styles.addButton} onPress={toggleTaskModal}>
+      <Text>Add Task</Text>
       </TouchableOpacity>
 
-      {/* Task Creation/Edit Modal */}
-      {/* Add your modal component here */}
+      <Modal
+  visible={isTaskModalVisible}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={toggleTaskModal}
+>
+  <View style={styles.centeredView}>
+    <View style={styles.taskModal}>
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={taskName}
+        onChangeText={setTaskName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Description (optional)"
+        multiline
+        value={taskDescription}
+        onChangeText={setTaskDescription}
+      />
+<View style={styles.buttonContainer}>
+  <TouchableOpacity
+    style={styles.saveButton}
+    onPress={addTask}
+  >
+    <Text style={styles.saveButtonText}>Save</Text>
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.cancelButton}
+    onPress={toggleTaskModal}
+  >
+    <Text style={styles.cancelButtonText}>Cancel</Text>
+  </TouchableOpacity>
+</View>
+    </View>
+  </View>
+</Modal>
     </View>
   );
 };
@@ -209,19 +370,105 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5
     },
-    confirmButton: {
-    marginTop: 20,
-    backgroundColor: '#2196F3',
+     confirmButton: {
+    backgroundColor: '#0275d8', // Bootstrap info blue for confirm button
     borderRadius: 10,
-    padding: 10,
-    elevation: 2
-    },
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    alignSelf: 'center', // Center button in modal
+    marginTop: 10,
+  },
     confirmButtonText: {
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center'
     },
-    // Add styles for the modal and other components as needed
+    // ... other styles
+
+    taskModal: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        width: '90%', // Adjust the width if necessary
+        alignSelf: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+  
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333', // Dark grey for text
+  },
+  
+  input: {
+    height: 50, // Larger input for better touch area
+    borderColor: '#ddd', // Light grey border
+    borderWidth: 1,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    borderRadius: 10, // Rounded corners for inputs
+    backgroundColor: '#fafafa', // Slightly off-white background
+    fontSize: 16, // Larger font size
+  },
+  
+  saveButton: {
+    backgroundColor: '#5cb85c', // Bootstrap success green for save button
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignSelf: 'center', 
+  },
+  
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  
+  cancelButton: {
+    backgroundColor: '#d9534f', // Bootstrap danger red for cancel/delete button
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignSelf: 'center', 
+  },
+  
+  cancelButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly', 
+    marginTop: 20,
+  },
+
+  deleteButton: {
+    backgroundColor: '#d9534f', // Bootstrap danger red for delete button
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    // alignSelf: 'center', // You can remove alignSelf if you are using buttonContainer for positioning
+  },
+  
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  
   });
   
   export default MainDashboard;
