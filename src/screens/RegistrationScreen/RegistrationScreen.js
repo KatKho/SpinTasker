@@ -1,20 +1,50 @@
-import React, { useState } from 'react'
-import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useState } from 'react';
+import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import styles from './styles';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { app } from '../../firebase/config'; 
 
-export default function RegistrationScreen({navigation}) {
-    const [fullName, setFullName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
+export default function RegistrationScreen({ navigation }) {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-    const onFooterLinkPress = () => {
-        navigation.navigate('Login')
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const onFooterLinkPress = () => {
+    navigation.navigate('Login');
+  };
+
+  const onRegisterPress = () => {
+    if (password !== confirmPassword) {
+      alert("Passwords don't match.");
+      return;
     }
-
-    const onRegisterPress = () => {
-    }
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((response) => {
+        const uid = response.user.uid;
+        const data = {
+          id: uid,
+          email,
+          fullName,
+        };
+        const usersRef = doc(db, 'users', uid);
+        setDoc(usersRef, data)
+          .then(() => {
+            navigation.navigate('Home', { user: data });
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  }
 
     return (
         <View style={styles.container}>

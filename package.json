@@ -9,10 +9,10 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@firebase/auth": "^1.5.1",
+    "@firebase/firestore": "^4.4.1",
     "@react-native-community/datetimepicker": "7.6.1",
     "@react-native-community/masked-view": "^0.1.11",
-    "@react-native-firebase/app": "^17.4.2",
-    "@react-native-firebase/auth": "^17.4.2",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/drawer": "^6.6.6",
     "@react-navigation/native": "^6.1.9",
@@ -21,7 +21,7 @@
     "expo": "^50.0.2",
     "expo-constants": "~15.4.5",
     "expo-status-bar": "~1.11.1",
-    "firebase": "^10.7.1",
+    "firebase": "^10.7.2",
     "react": "18.2.0",
     "react-native": "0.73.2",
     "react-native-dotenv": "^3.4.9",
