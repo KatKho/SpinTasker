@@ -6,7 +6,7 @@ import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { app } from '../../firebase/config'; 
 
-export default function RegistrationScreen({ navigation }) {
+export default function RegistrationScreen({ navigation, setUser }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,8 +33,11 @@ export default function RegistrationScreen({ navigation }) {
           fullName,
         };
         const usersRef = doc(db, 'users', uid);
+        console.log(usersRef);
+        console.log(data);
         setDoc(usersRef, data)
           .then(() => {
+            setUser(data);
             navigation.navigate('Home', { user: data });
           })
           .catch((error) => {
