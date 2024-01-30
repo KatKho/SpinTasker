@@ -33,8 +33,6 @@ export default function RegistrationScreen({ navigation, setUser }) {
           fullName,
         };
         const usersRef = doc(db, 'users', uid);
-        console.log(usersRef);
-        console.log(data);
         setDoc(usersRef, data)
           .then(() => {
             setUser(data);

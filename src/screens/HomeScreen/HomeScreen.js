@@ -8,7 +8,6 @@ export default function HomeScreen({ navigation }) {
     const handleSignOut = () => {
         signOut(auth).then(() => {
             // Sign-out successful.
-            // You can navigate to the login screen or do nothing to go back to the login screen automatically if your auth state changes are properly set up
         }).catch((error) => {
             // An error happened.
             console.error('Sign out error', error);
