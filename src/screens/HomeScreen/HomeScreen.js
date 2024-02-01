@@ -1,45 +1,131 @@
 import React, { useState, useEffect } from 'react';
-import { Platform, View, Text,TouchableOpacity, Modal, TextInput, Button } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
+import { app } from '../../firebase/config'; 
 
-export default function HomeScreen({ navigation }) {
-    const auth = getAuth();
+export default function HomeScreen({ navigation, route }) {
+  const auth = getAuth();
+  const db = getFirestore(app);
+  const userUID = route.params?.userId;
 
-    const handleSignOut = () => {
-        signOut(auth).then(() => {
-            // Sign-out successful.
-        }).catch((error) => {
-            // An error happened.
-            console.error('Sign out error', error);
-        });
-    };
-
-    // Initialize state variables
+  // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
+  const [allTasks, setAllTasks] = useState([]);
+  const [displayedTasks, setDisplayedTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
+  const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
-  
-  // Initialize allTasks with an empty array
-  const [allTasks, setAllTasks] = useState([]); // You should fetch this from a database or storage
 
+  // Function to fetch tasks from Firestore
+  const fetchTasks = async () => {
+    console.log("Fetching tasks for userID:", userUID);
+    try {
+    const q = query(collection(db, "tasks"), where("userId", "==", userUID));
+    const querySnapshot = await getDocs(q);
+    const tasks = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setAllTasks(tasks);
+    updateDisplayedTasks(selectedDate);
+    } catch (error) {
+    console.error("Error fetching tasks: ", error);
+  }
+  };
+
+// Effect to fetch tasks when userUID changes
+useEffect(() => {
+    if (userUID) {
+      fetchTasks();
+    }
+  }, [userUID]);
+  
+  // Effect to update displayed tasks when selectedDate changes
+  useEffect(() => {
+    updateDisplayedTasks(selectedDate);
+  }, [selectedDate, allTasks]);
+  
   // Function to update displayed tasks based on the selected date
   const updateDisplayedTasks = (newDate) => {
     const filteredTasks = allTasks.filter(task => {
       const taskDate = new Date(task.date);
       return taskDate.toDateString() === newDate.toDateString();
     });
-    setDisplayedTasks(filteredTasks); // Update the state to reflect the filtered tasks
+    setDisplayedTasks(filteredTasks);
   };
 
-  // Initialize displayedTasks with the tasks for today
-  const [displayedTasks, setDisplayedTasks] = useState([]);
+  // Function to add a task
+  const addTask = async () => {
+    const newTask = {
+      userId: userUID,
+      name: taskName,
+      description: taskDescription,
+      completed: false,
+      date: selectedDate.toISOString(),
+    };
 
+    const tasksRef = collection(db, 'tasks');
+    try {
+      const docRef = await addDoc(tasksRef, newTask);
+      setAllTasks(prevTasks => [...prevTasks, { ...newTask, id: docRef.id }]);
+      updateDisplayedTasks(selectedDate);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error adding task: ', error);
+    }
+
+    setTaskName('');
+    setTaskDescription('');
+    setIsTaskModalVisible(false);
+  };
+
+//   // Function to update a task
+//   const updateTask = async () => {
+//     const taskRef = doc(db, "tasks", currentTask.id);
+//     try {
+//       await updateDoc(taskRef, {
+//         name: taskName,
+//         description: taskDescription,
+//       });
+//       await fetchTasks();
+//     } catch (error) {
+//       console.error('Error updating task: ', error);
+//     }
+
+//     setCurrentTask(null);
+//     setIsEditModalVisible(false);
+//     setTaskName('');
+//     setTaskDescription('');
+//   };
+
+//   // Function to delete a task
+//   const deleteTask = async () => {
+//     const taskRef = doc(db, "tasks", currentTask.id);
+//     try {
+//       await deleteDoc(taskRef);
+//       await fetchTasks();
+//     } catch (error) {
+//       console.error('Error deleting task: ', error);
+//     }
+
+//     setCurrentTask(null);
+//     setIsEditModalVisible(false);
+//   };
+
+  // Function to handle sign-out
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Sign out error', error);
+    }
+  };
   // Function to handle date change
   const onChangeDate = (event, newSelectedDate) => {
     const currentDate = newSelectedDate || selectedDate;
@@ -48,39 +134,64 @@ export default function HomeScreen({ navigation }) {
     updateDisplayedTasks(currentDate);
   };
 
-  // Function to add a task
-  const addTask = () => {
-    const newTask = {
-      id: Math.random().toString(36).substr(2, 9), // Generating a unique ID
-      name: taskName,
-      description: taskDescription,
-      completed: false,
-      date: selectedDate.toISOString(),
-    };
-    setAllTasks(prevTasks => {
-      const updatedTasks = [...prevTasks, newTask];
-      updateDisplayedTasks(selectedDate); // Update displayed tasks
-      return updatedTasks;
-    });
-    setTaskName('');
-    setTaskDescription('');
-    setIsTaskModalVisible(false);
-  };
-
-  // Function to handle task completion toggle
-  const toggleTaskCompletion = (taskId) => {
-    setAllTasks(prevTasks => prevTasks.map(task => {
-      if (task.id === taskId) {
-        return { ...task, completed: !task.completed };
+// Toggle task completion
+const toggleTaskCompletion = async (taskId) => {
+    const task = allTasks.find(t => t.id === taskId);
+    if (task) {
+      const taskRef = doc(db, "tasks", taskId);
+      try {
+        await updateDoc(taskRef, {
+          completed: !task.completed
+        });
+        await fetchTasks(); 
+      } catch (error) {
+        console.error('Error toggling task completion: ', error);
       }
-      return task;
-    }));
+    }
   };
 
-  // Function to handle task selection from the wheel
-  const selectTask = (taskId) => {
-    // Logic to handle task selection
+// Function to update a task
+const updateTask = async (taskId, updatedData) => {
+    const taskRef = doc(db, "tasks", taskId);
+    try {
+      await updateDoc(taskRef, updatedData);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error updating task: ', error);
+    }
   };
+  
+  // Function to delete a task
+  const deleteTask = async (taskId) => {
+    const taskRef = doc(db, "tasks", taskId);
+    try {
+      await deleteDoc(taskRef);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task: ', error);
+    }
+  };
+  
+// Function to handle updating a task
+const handleUpdateTask = async () => {
+    if (currentTask) {
+      await updateTask(currentTask.id, { name: taskName, description: taskDescription });
+      setIsEditModalVisible(false);
+      setCurrentTask(null);
+      setTaskName('');
+      setTaskDescription('');
+    }
+  };
+  
+  // Function to handle deleting a task
+  const handleDeleteTask = async () => {
+    if (currentTask) {
+      await deleteTask(currentTask.id);
+      setIsEditModalVisible(false);
+      setCurrentTask(null);
+    }
+  };
+  
 
     // Function to show the date picker
     const showDatePickerModal = () => {
@@ -104,43 +215,7 @@ export default function HomeScreen({ navigation }) {
         setIsEditModalVisible(true);
       };
       
-// Function to delete a task
-const handleDeleteTask = () => {
-    setAllTasks(prevTasks => {
-      const updatedTasks = prevTasks.filter(task => task.id !== currentTask.id);
-      updateDisplayedTasks(selectedDate); // Update displayed tasks
-      return updatedTasks;
-    });
-    setCurrentTask(null);
-    setIsEditModalVisible(false);
-    setTaskName('');
-    setTaskDescription('');
-  };
-
-  // Function to handle task update
-  const handleUpdateTask = () => {
-    setAllTasks(prevTasks => {
-      const updatedTasks = prevTasks.map(task => {
-        if (task.id === currentTask.id) {
-          return { ...task, name: taskName, description: taskDescription };
-        }
-        return task;
-      });
-      updateDisplayedTasks(selectedDate); // Update displayed tasks
-      return updatedTasks;
-    });
-    setCurrentTask(null);
-    setIsEditModalVisible(false);
-    setTaskName('');
-    setTaskDescription('');
-  };
-
-  useEffect(() => {
-    updateDisplayedTasks(selectedDate);
-  }, [selectedDate, allTasks]);
-
-
-    return (
+      return (
 
         <View style={styles.container}>
         <View style={styles.dropdownMenu}>
