@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Platform, View, Text,TouchableOpacity, Modal, TextInput, Button } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import styles from './styles';
+import { app } from '../../firebase/config'; 
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, route }) {
     const auth = getAuth();
+
+    const userUID = route.params?.userId;
+    const db = getFirestore(app);
 
     const handleSignOut = () => {
         signOut(auth).then(() => {
@@ -52,30 +57,50 @@ export default function HomeScreen({ navigation }) {
   const addTask = () => {
     const newTask = {
       id: Math.random().toString(36).substr(2, 9), // Generating a unique ID
+      userId: userUID,
       name: taskName,
       description: taskDescription,
       completed: false,
       date: selectedDate.toISOString(),
     };
-    setAllTasks(prevTasks => {
-      const updatedTasks = [...prevTasks, newTask];
-      updateDisplayedTasks(selectedDate); // Update displayed tasks
-      return updatedTasks;
-    });
+  
+    // Save the task to Firestore
+    const tasksRef = collection(db, 'tasks');
+    addDoc(tasksRef, newTask)
+      .then((docRef) => {
+        console.log('Task added successfully with ID:', docRef.id);
+        // Update local state to include the new task
+        setAllTasks(prevTasks => [...prevTasks, { ...newTask, id: docRef.id }]);
+        updateDisplayedTasks(selectedDate); // Update displayed tasks
+      })
+      .catch((error) => {
+        console.error('Error adding task: ', error);
+      });
+  
+    // Reset task input fields
     setTaskName('');
     setTaskDescription('');
     setIsTaskModalVisible(false);
   };
+//     setAllTasks(prevTasks => {
+//       const updatedTasks = [...prevTasks, newTask];
+//       updateDisplayedTasks(selectedDate); // Update displayed tasks
+//       return updatedTasks;
+//     });
+//     setTaskName('');
+//     setTaskDescription('');
+//     setIsTaskModalVisible(false);
+//   };
 
   // Function to handle task completion toggle
-  const toggleTaskCompletion = (taskId) => {
-    setAllTasks(prevTasks => prevTasks.map(task => {
-      if (task.id === taskId) {
-        return { ...task, completed: !task.completed };
-      }
-      return task;
-    }));
-  };
+//   const toggleTaskCompletion = (taskId) => {
+//     setAllTasks(prevTasks => prevTasks.map(task => {
+//       if (task.id === taskId) {
+//         return { ...task, completed: !task.completed };
+//       }
+//       return task;
+//     }));
+//   };
 
   // Function to handle task selection from the wheel
   const selectTask = (taskId) => {
