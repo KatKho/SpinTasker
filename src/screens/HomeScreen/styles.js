@@ -206,12 +206,13 @@ export default StyleSheet.create({
       fontWeight: 'bold',
       color: 'white',
   },
-  // wheelContainer: {
-  //   // width: 200, // Adjust as needed
-  //   // height: 200, // Adjust as needed
-  //   // borderRadius: 100, // Half of width/height to make it round
-  //   // overflow: 'hidden',
-  // },
+  wheelContainer: {
+    position: 'relative', // This is important for absolute children
+    height: 200, // Same as SVG height
+    width: 200, // Same as SVG width
+    justifyContent: 'center', // Centers children vertically in the container
+    alignItems: 'center', // Centers children horizontally in the container
+  },
   // wheelSection: {
   //   // width: 200, // Same as wheelContainer width
   //   // height: 100, // Half of wheelContainer height
@@ -220,5 +221,23 @@ export default StyleSheet.create({
   //   // justifyContent: 'center',
   //   // alignItems: 'center',
   // },
+  spinButton: {
+    position: 'absolute',
+    width: 60, // Adjust size as needed
+    height: 60, // Adjust size as needed
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffbe98', // Button color
+    borderRadius: 30, // Half of width/height
+    top: '50%', // Center vertically
+    left: '50%', // Center horizontally
+    marginTop: -30, // Adjust for the size of the button to center
+    marginLeft: -30, // Adjust for the size of the button to center
+    
+  },
+  spinButtonText: {
+    fontSize: 16,
+    color: '#000', // Text color
+  },
 
     })

@@ -23,6 +23,7 @@ export default function HomeScreen({ navigation, route }) {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [selectedTasks, setSelectedTasks] = useState([]);
+  const [winningTaskId, setWinningTaskId] = useState(null);
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
 
@@ -216,12 +217,12 @@ const handleUpdateTask = async () => {
       };
 
       const PieSlice = ({ color, angle, index, tasksLength }) => {
+        // const fillColor = task.id === winningTaskId ? '#FFFF00' : color;
         const radius = 100;
-        // When there's only one task, draw a full circle.
         const pathData = tasksLength === 1
           ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
           : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
-        
+      
         return <Path d={pathData} fill={color} />;
       };
       
@@ -251,27 +252,43 @@ const handleUpdateTask = async () => {
       }
       
       const Wheel = ({ tasks }) => {
-        const angle = 360 / tasks.length;
+        const radius = 100; 
+        const angle = 360 / (tasks.length || 1); 
       
         return (
-          <Svg height="200" width="200" viewBox="0 0 200 200">
-            <G transform="translate(0, 0)">
-              {tasks.map((task, index) => {
-                const backgroundColor = getRandomColor();
-                return (
-                  <PieSlice
-                    key={task.id}
-                    color={backgroundColor}
-                    angle={angle}
-                    index={index}
-                    tasksLength={tasks.length}
-                  />
-                );
-              })}
-            </G>
-          </Svg>
+          <View style={styles.wheelContainer}>
+            <Svg height="200" width="200" viewBox="0 0 200 200">
+              <G transform="translate(0, 0)">
+                {tasks.map((task, index) => {
+                  const backgroundColor = getRandomColor();
+                  return (
+                    <PieSlice
+                      key={task.id}
+                      color={backgroundColor}
+                      angle={angle}
+                      index={index}
+                      tasksLength={tasks.length}
+                    />
+                  );
+                })}
+              </G>
+            </Svg>
+            <TouchableOpacity
+              style={styles.spinButton}
+              onPress={handleSpin}
+            >
+              <Text style={styles.spinButtonText}>Spin</Text>
+            </TouchableOpacity> 
+          </View>
         );
-      };      
+      };
+      
+    // Function to handle the spin action
+    const handleSpin = () => {
+    const randomIndex = Math.floor(Math.random() * tasksForWheel.length);
+    const winningTask = tasksForWheel[randomIndex];
+    setWinningTaskId(winningTask.id);
+  };
       
 
       return (
@@ -287,10 +304,7 @@ const handleUpdateTask = async () => {
         <View style={styles.wheel}>
         <Wheel tasks={tasksForWheel} />
         </View>
-  
-        <TouchableOpacity style={styles.addButton} onPress={() => {/* Logic to add a task */}}>
-          <Text>Spin!</Text>
-        </TouchableOpacity>
+
       
         <TouchableOpacity onPress={showDatePickerModal} style={styles.dateDisplay}>
           <Text style={styles.dateText}>
