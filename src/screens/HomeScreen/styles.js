@@ -188,4 +188,22 @@ export default StyleSheet.create({
       textAlign: 'center',
     },
     
+    checkboxBase: {
+      width: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 4,
+      borderWidth: 2,
+      borderColor: 'grey',
+      backgroundColor: 'transparent',
+  },
+  checkboxChecked: {
+      backgroundColor: 'pink', // Example color, adjust as needed
+  },
+  checkboxCheckmark: {
+      fontWeight: 'bold',
+      color: 'white',
+  },
+
     })

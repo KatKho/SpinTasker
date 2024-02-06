@@ -21,6 +21,7 @@ export default function HomeScreen({ navigation, route }) {
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
+  const [selectedTasks, setSelectedTasks] = useState([]);
 
   // Function to fetch tasks from Firestore
   const fetchTasks = async () => {
@@ -215,6 +216,28 @@ const handleUpdateTask = async () => {
         setIsEditModalVisible(true);
       };
       
+          // Function to handle checkbox toggle
+    const handleCheckboxToggle = (taskId) => {
+        if (selectedTasks.includes(taskId)) {
+            setSelectedTasks(selectedTasks.filter(id => id !== taskId));
+        } else {
+            setSelectedTasks([...selectedTasks, taskId]);
+        }
+    };
+
+    // Custom Checkbox Component
+    const CustomCheckbox = ({ taskId }) => {
+        const isChecked = selectedTasks.includes(taskId);
+        return (
+            <TouchableOpacity
+                style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
+                onPress={() => handleCheckboxToggle(taskId)}
+            >
+                {isChecked && <Text style={styles.checkboxCheckmark}>✔</Text>}
+            </TouchableOpacity>
+        );
+    };
+
       return (
 
         <View style={styles.container}>
@@ -270,11 +293,13 @@ const handleUpdateTask = async () => {
               
         <View style={styles.taskList}>
           {displayedTasks.map((task) => (
-            <TouchableOpacity 
-              key={task.id} 
-              style={styles.taskItem}
-              onPress={() => toggleTaskCompletion(task.id)}
-            >
+            // <TouchableOpacity 
+            //   key={task.id} 
+            //   style={styles.taskItem}
+            //   onPress={() => toggleTaskCompletion(task.id)}
+            // >
+            <View key={task.id} style={styles.taskItem}>
+                        <CustomCheckbox taskId={task.id} />
               <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
                 {task.name}
               </Text>
@@ -320,7 +345,8 @@ const handleUpdateTask = async () => {
       </View>
     </View>
   </Modal>
-            </TouchableOpacity>
+            {/* </TouchableOpacity> */}
+            </View>
           ))}
         </View>
   
