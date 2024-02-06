@@ -20,8 +20,8 @@ export default StyleSheet.create({
         height: 200, // Arbitrary size, you can adjust as needed
         width: 200, // This should be a square
         borderRadius: 100, // Half of the size to make it a circle
-        borderWidth: 5,
-        borderColor: '#64b5f6',
+        // borderWidth: 5,
+        // borderColor: '#64b5f6',
         backgroundColor: 'lightblue'
       },
       wheelText: {

@@ -5,12 +5,17 @@ import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
 import { app } from '../../firebase/config'; 
-import Svg, { Path, G } from 'react-native-svg';
+import Svg, { Path, G, Polygon } from 'react-native-svg';
+import { Animated } from 'react-native';
+import { useRef } from 'react';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
   const db = getFirestore(app);
   const userUID = route.params?.userId;
+  const spinValue = useRef(new Animated.Value(0)).current;
+  const pointerSize = 30;
+  const wheelSize = 200;
 
   // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -257,38 +262,74 @@ const handleUpdateTask = async () => {
       
         return (
           <View style={styles.wheelContainer}>
-            <Svg height="200" width="200" viewBox="0 0 200 200">
-              <G transform="translate(0, 0)">
-                {tasks.map((task, index) => {
-                  const backgroundColor = getRandomColor();
-                  return (
-                    <PieSlice
-                      key={task.id}
-                      color={backgroundColor}
-                      angle={angle}
-                      index={index}
-                      tasksLength={tasks.length}
-                    />
-                  );
-                })}
-              </G>
+            <Animated.View
+              style={{
+                transform: [{ rotate: spin }], // Bind the rotation to the animated value
+              }}
+            >
+              <Svg height={wheelSize} width={wheelSize} viewBox={`0 0 ${wheelSize} ${wheelSize}`}>
+                <G transform={`translate(0, 0)`}>
+                  {tasks.map((task, index) => {
+                    const backgroundColor = task.id === winningTaskId ? 'winningColor' : getRandomColor();
+                    return (
+                      <PieSlice
+                        key={task.id}
+                        color={backgroundColor}
+                        angle={angle}
+                        index={index}
+                        tasksLength={tasks.length}
+                      />
+                    );
+                  })}
+                </G>
+              </Svg>
+            </Animated.View>
+            <Svg
+              height={pointerSize}
+              width={pointerSize}
+              style={{
+                position: 'absolute',
+                top: radius - 50, // Position at the top of the wheel
+                left: radius - (pointerSize / 2), // Center horizontally
+              }}
+            >
+              <Polygon
+                points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
+                fill="black" // Pointer color
+              />
             </Svg>
             <TouchableOpacity
               style={styles.spinButton}
               onPress={handleSpin}
+              activeOpacity={1}
             >
               <Text style={styles.spinButtonText}>Spin</Text>
-            </TouchableOpacity> 
+            </TouchableOpacity>
           </View>
         );
       };
       
-    // Function to handle the spin action
-    const handleSpin = () => {
-    const randomIndex = Math.floor(Math.random() * tasksForWheel.length);
-    const winningTask = tasksForWheel[randomIndex];
-    setWinningTaskId(winningTask.id);
+// Function to start the spin animation
+const handleSpin = () => {
+    // Set up the animation
+    Animated.timing(spinValue, {
+      toValue: 1, // Arbitrary value to represent the end of the animation
+      duration: 2000, // Duration of the spin in milliseconds
+      useNativeDriver: true, // Use native driver for better performance
+    }).start(() => {
+      // Animation complete callback
+      spinValue.setValue(0); // Reset the animation
+      const randomIndex = Math.floor(Math.random() * tasksForWheel.length);
+      const winningTask = tasksForWheel[randomIndex];
+      setWinningTaskId(winningTask.id);
+    });
   };
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '3600deg'], // Define the degrees of rotation
+  });
+  
       
 
       return (
