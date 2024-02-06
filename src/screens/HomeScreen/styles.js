@@ -22,6 +22,7 @@ export default StyleSheet.create({
         borderRadius: 100, // Half of the size to make it a circle
         borderWidth: 5,
         borderColor: '#64b5f6',
+        backgroundColor: 'lightblue'
       },
       wheelText: {
         fontSize: 18,
@@ -199,11 +200,25 @@ export default StyleSheet.create({
       backgroundColor: 'transparent',
   },
   checkboxChecked: {
-      backgroundColor: 'pink', // Example color, adjust as needed
+      backgroundColor: 'lightblue', 
   },
   checkboxCheckmark: {
       fontWeight: 'bold',
       color: 'white',
   },
+  // wheelContainer: {
+  //   // width: 200, // Adjust as needed
+  //   // height: 200, // Adjust as needed
+  //   // borderRadius: 100, // Half of width/height to make it round
+  //   // overflow: 'hidden',
+  // },
+  // wheelSection: {
+  //   // width: 200, // Same as wheelContainer width
+  //   // height: 100, // Half of wheelContainer height
+  //   // // borderTopRightRadius: 100, // Same as wheelContainer borderRadius
+  //   // // borderBottomRightRadius: 100, // Same as wheelContainer borderRadius
+  //   // justifyContent: 'center',
+  //   // alignItems: 'center',
+  // },
 
     })

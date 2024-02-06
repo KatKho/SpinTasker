@@ -5,6 +5,7 @@ import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
 import { app } from '../../firebase/config'; 
+import Svg, { Path, G } from 'react-native-svg';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
@@ -23,9 +24,11 @@ export default function HomeScreen({ navigation, route }) {
   const [currentTask, setCurrentTask] = useState(null);
   const [selectedTasks, setSelectedTasks] = useState([]);
 
+  const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
+
   // Function to fetch tasks from Firestore
   const fetchTasks = async () => {
-    console.log("Fetching tasks for userID:", userUID);
+    // console.log("Fetching tasks for userID:", userUID);
     try {
     const q = query(collection(db, "tasks"), where("userId", "==", userUID));
     const querySnapshot = await getDocs(q);
@@ -85,39 +88,6 @@ useEffect(() => {
     setTaskDescription('');
     setIsTaskModalVisible(false);
   };
-
-//   // Function to update a task
-//   const updateTask = async () => {
-//     const taskRef = doc(db, "tasks", currentTask.id);
-//     try {
-//       await updateDoc(taskRef, {
-//         name: taskName,
-//         description: taskDescription,
-//       });
-//       await fetchTasks();
-//     } catch (error) {
-//       console.error('Error updating task: ', error);
-//     }
-
-//     setCurrentTask(null);
-//     setIsEditModalVisible(false);
-//     setTaskName('');
-//     setTaskDescription('');
-//   };
-
-//   // Function to delete a task
-//   const deleteTask = async () => {
-//     const taskRef = doc(db, "tasks", currentTask.id);
-//     try {
-//       await deleteDoc(taskRef);
-//       await fetchTasks();
-//     } catch (error) {
-//       console.error('Error deleting task: ', error);
-//     }
-
-//     setCurrentTask(null);
-//     setIsEditModalVisible(false);
-//   };
 
   // Function to handle sign-out
   const handleSignOut = async () => {
@@ -192,7 +162,6 @@ const handleUpdateTask = async () => {
       setCurrentTask(null);
     }
   };
-  
 
     // Function to show the date picker
     const showDatePickerModal = () => {
@@ -207,7 +176,6 @@ const handleUpdateTask = async () => {
     const toggleTaskModal = () => {
     setIsTaskModalVisible(!isTaskModalVisible);
     };
-
       
       const showEditModal = (task) => {
         setCurrentTask(task);
@@ -216,7 +184,7 @@ const handleUpdateTask = async () => {
         setIsEditModalVisible(true);
       };
       
-          // Function to handle checkbox toggle
+    // Function to handle checkbox toggle
     const handleCheckboxToggle = (taskId) => {
         if (selectedTasks.includes(taskId)) {
             setSelectedTasks(selectedTasks.filter(id => id !== taskId));
@@ -238,6 +206,74 @@ const handleUpdateTask = async () => {
         );
     };
 
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      };
+
+      const PieSlice = ({ color, angle, index, tasksLength }) => {
+        const radius = 100;
+        // When there's only one task, draw a full circle.
+        const pathData = tasksLength === 1
+          ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
+          : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
+        
+        return <Path d={pathData} fill={color} />;
+      };
+      
+      const describeArc = (x, y, radius, startAngle, endAngle) => {
+        const start = polarToCartesian(x, y, radius, endAngle);
+        const end = polarToCartesian(x, y, radius, startAngle);
+      
+        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+      
+        const d = [
+          "M", start.x, start.y, 
+          "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+          "L", x, y,
+          "Z"
+        ].join(" ");
+      
+        return d;       
+      }
+      
+      const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+        const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+      
+        return {
+          x: centerX + (radius * Math.cos(angleInRadians)),
+          y: centerY + (radius * Math.sin(angleInRadians))
+        };
+      }
+      
+      const Wheel = ({ tasks }) => {
+        const angle = 360 / tasks.length;
+      
+        return (
+          <Svg height="200" width="200" viewBox="0 0 200 200">
+            <G transform="translate(0, 0)">
+              {tasks.map((task, index) => {
+                const backgroundColor = getRandomColor();
+                return (
+                  <PieSlice
+                    key={task.id}
+                    color={backgroundColor}
+                    angle={angle}
+                    index={index}
+                    tasksLength={tasks.length}
+                  />
+                );
+              })}
+            </G>
+          </Svg>
+        );
+      };      
+      
+
       return (
 
         <View style={styles.container}>
@@ -249,7 +285,7 @@ const handleUpdateTask = async () => {
         </View>
   
         <View style={styles.wheel}>
-          {/* Add your wheel component here */}
+        <Wheel tasks={tasksForWheel} />
         </View>
   
         <TouchableOpacity style={styles.addButton} onPress={() => {/* Logic to add a task */}}>
