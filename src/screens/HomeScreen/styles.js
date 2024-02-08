@@ -20,8 +20,9 @@ export default StyleSheet.create({
         height: 200, // Arbitrary size, you can adjust as needed
         width: 200, // This should be a square
         borderRadius: 100, // Half of the size to make it a circle
-        borderWidth: 5,
-        borderColor: '#64b5f6',
+        // borderWidth: 5,
+        // borderColor: '#64b5f6',
+        backgroundColor: 'lightblue'
       },
       wheelText: {
         fontSize: 18,
@@ -188,4 +189,55 @@ export default StyleSheet.create({
       textAlign: 'center',
     },
     
+    checkboxBase: {
+      width: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 4,
+      borderWidth: 2,
+      borderColor: 'grey',
+      backgroundColor: 'transparent',
+  },
+  checkboxChecked: {
+      backgroundColor: 'lightblue', 
+  },
+  checkboxCheckmark: {
+      fontWeight: 'bold',
+      color: 'white',
+  },
+  wheelContainer: {
+    position: 'relative', // This is important for absolute children
+    height: 200, // Same as SVG height
+    width: 200, // Same as SVG width
+    justifyContent: 'center', // Centers children vertically in the container
+    alignItems: 'center', // Centers children horizontally in the container
+  },
+  // wheelSection: {
+  //   // width: 200, // Same as wheelContainer width
+  //   // height: 100, // Half of wheelContainer height
+  //   // // borderTopRightRadius: 100, // Same as wheelContainer borderRadius
+  //   // // borderBottomRightRadius: 100, // Same as wheelContainer borderRadius
+  //   // justifyContent: 'center',
+  //   // alignItems: 'center',
+  // },
+  spinButton: {
+    position: 'absolute',
+    width: 60, // Adjust size as needed
+    height: 60, // Adjust size as needed
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffbe98', // Button color
+    borderRadius: 30, // Half of width/height
+    top: '50%', // Center vertically
+    left: '50%', // Center horizontally
+    marginTop: -30, // Adjust for the size of the button to center
+    marginLeft: -30, // Adjust for the size of the button to center
+    
+  },
+  spinButtonText: {
+    fontSize: 16,
+    color: '#000', // Text color
+  },
+
     })

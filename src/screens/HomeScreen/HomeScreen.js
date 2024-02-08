@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
 import { app } from '../../firebase/config'; 
+import Svg, { Path, G, Polygon } from 'react-native-svg';
+import { Animated } from 'react-native';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
   const db = getFirestore(app);
   const userUID = route.params?.userId;
+  const spinValue = useRef(new Animated.Value(0)).current;
+  const pointerSize = 30;
+  const wheelSize = 200;
+  const finalAngleRef = useRef(0);
+  const extraSpins = 5;
 
   // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -21,23 +28,37 @@ export default function HomeScreen({ navigation, route }) {
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [winningTaskId, setWinningTaskId] = useState(null);
+  const [winningColor, setWinningColor] = useState('black');
 
-  // Function to fetch tasks from Firestore
-  const fetchTasks = async () => {
-    console.log("Fetching tasks for userID:", userUID);
+  const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
+
+// Function to fetch tasks from Firestore
+const fetchTasks = async () => {
     try {
-    const q = query(collection(db, "tasks"), where("userId", "==", userUID));
-    const querySnapshot = await getDocs(q);
-    const tasks = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    setAllTasks(tasks);
-    updateDisplayedTasks(selectedDate);
+      const q = query(collection(db, "tasks"), where("userId", "==", userUID));
+      const querySnapshot = await getDocs(q);
+      const tasksWithColors = querySnapshot.docs.map((doc) => {
+        const taskData = doc.data();
+        // Assign a color if it doesn't have one, else use the existing color
+        taskData.color = taskData.color || getRandomColor();
+        return {
+          id: doc.id,
+          ...taskData
+        };
+      });
+      setAllTasks(tasksWithColors); // Update the tasks with colors
+      updateDisplayedTasks(selectedDate);
     } catch (error) {
-    console.error("Error fetching tasks: ", error);
-  }
+      console.error("Error fetching tasks: ", error);
+    }
   };
+  
+  useEffect(() => {
+    fetchTasks();
+  }, [userUID]); // Runs only when the userUID changes
+  
 
 // Effect to fetch tasks when userUID changes
 useEffect(() => {
@@ -84,39 +105,6 @@ useEffect(() => {
     setTaskDescription('');
     setIsTaskModalVisible(false);
   };
-
-//   // Function to update a task
-//   const updateTask = async () => {
-//     const taskRef = doc(db, "tasks", currentTask.id);
-//     try {
-//       await updateDoc(taskRef, {
-//         name: taskName,
-//         description: taskDescription,
-//       });
-//       await fetchTasks();
-//     } catch (error) {
-//       console.error('Error updating task: ', error);
-//     }
-
-//     setCurrentTask(null);
-//     setIsEditModalVisible(false);
-//     setTaskName('');
-//     setTaskDescription('');
-//   };
-
-//   // Function to delete a task
-//   const deleteTask = async () => {
-//     const taskRef = doc(db, "tasks", currentTask.id);
-//     try {
-//       await deleteDoc(taskRef);
-//       await fetchTasks();
-//     } catch (error) {
-//       console.error('Error deleting task: ', error);
-//     }
-
-//     setCurrentTask(null);
-//     setIsEditModalVisible(false);
-//   };
 
   // Function to handle sign-out
   const handleSignOut = async () => {
@@ -191,7 +179,6 @@ const handleUpdateTask = async () => {
       setCurrentTask(null);
     }
   };
-  
 
     // Function to show the date picker
     const showDatePickerModal = () => {
@@ -206,7 +193,6 @@ const handleUpdateTask = async () => {
     const toggleTaskModal = () => {
     setIsTaskModalVisible(!isTaskModalVisible);
     };
-
       
       const showEditModal = (task) => {
         setCurrentTask(task);
@@ -215,6 +201,162 @@ const handleUpdateTask = async () => {
         setIsEditModalVisible(true);
       };
       
+    // Function to handle checkbox toggle
+    const handleCheckboxToggle = (taskId) => {
+        if (selectedTasks.includes(taskId)) {
+            setSelectedTasks(selectedTasks.filter(id => id !== taskId));
+        } else {
+            setSelectedTasks([...selectedTasks, taskId]);
+        }
+    };
+
+    // Custom Checkbox Component
+    const CustomCheckbox = ({ taskId }) => {
+        const isChecked = selectedTasks.includes(taskId);
+        return (
+            <TouchableOpacity
+                style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
+                onPress={() => handleCheckboxToggle(taskId)}
+            >
+                {isChecked && <Text style={styles.checkboxCheckmark}>✔</Text>}
+            </TouchableOpacity>
+        );
+    };
+
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      };
+
+      const assignColorsToTasks = (tasks) => {
+        return tasks.map(task => ({ ...task, color: getRandomColor() }));
+      };
+
+      const PieSlice = ({ color, angle, index, tasksLength }) => {
+        const radius = 100;
+        const pathData = tasksLength === 1
+          ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
+          : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
+        
+        return <Path d={pathData} fill={color} />;
+      };
+      
+      const describeArc = (x, y, radius, startAngle, endAngle) => {
+        const start = polarToCartesian(x, y, radius, endAngle);
+        const end = polarToCartesian(x, y, radius, startAngle);
+      
+        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+      
+        const d = [
+          "M", start.x, start.y, 
+          "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+          "L", x, y,
+          "Z"
+        ].join(" ");
+      
+        return d;       
+      }
+      
+      const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+        const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+      
+        return {
+          x: centerX + (radius * Math.cos(angleInRadians)),
+          y: centerY + (radius * Math.sin(angleInRadians))
+        };
+      }
+      
+      const Wheel = ({ tasks }) => {
+        const radius = 100;
+        const angle = 360 / (tasks.length || 1);
+      
+        // Use tasks directly without reassigning colors
+        return (
+          <View style={styles.wheelContainer}>
+            <Animated.View
+              style={{
+                transform: [{ rotate: spin }],
+              }}
+            >
+              <Svg height={wheelSize} width={wheelSize} viewBox={`0 0 ${wheelSize} ${wheelSize}`}>
+                <G transform={`translate(0, 0)`}>
+                  {tasks.map((task, index) => (
+                    <PieSlice
+                      key={task.id}
+                      color={task.color} // Color is already assigned, use as is
+                      angle={angle}
+                      index={index}
+                      tasksLength={tasks.length}
+                    />
+                  ))}
+                </G>
+              </Svg>
+            </Animated.View>
+            <Svg
+              height={pointerSize}
+              width={pointerSize}
+              style={{
+                position: 'absolute',
+                top: radius - 50,
+                left: radius - (pointerSize / 2),
+              }}
+            >
+              <Polygon
+                points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
+                // fill={winningColor} // Use the winning color for the pointer
+                fill='black'
+              />
+            </Svg>
+            <TouchableOpacity
+              style={styles.spinButton}
+              onPress={handleSpin}
+              activeOpacity={1}
+            >
+              <Text style={styles.spinButtonText}>Spin</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      };
+      
+      
+
+      const handleSpin = () => {
+        // Calculate the angle for each section
+        // const sectionAngle = 360 / tasksForWheel.length;
+      
+        // Choose a random section to stop
+        // const randomSection = Math.floor(Math.random() * tasksForWheel.length);
+      
+        const finalAngle = 900 + Math.random() * (2000 - 900);
+
+        // Update the reference to the final angle for the next spin
+        finalAngleRef.current = finalAngle;
+        console.log(finalAngleRef.current);
+      
+        // Start the animation
+        Animated.timing(spinValue, {
+          toValue: finalAngle / 360,
+          duration: 8000, 
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }).start(() => {
+          // Set the winning task ID and color after the wheel stops
+        //   const winningTask = tasksForWheel[randomSection];
+        //   setWinningTaskId(winningTask.id);
+        //   setWinningColor(winningTask.color);
+        });
+      };
+    
+    // Interpolate the spin value to create a rotation transform
+    const spin = spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', `${finalAngleRef.current}deg`],
+    });
+  
       return (
 
         <View style={styles.container}>
@@ -226,12 +368,9 @@ const handleUpdateTask = async () => {
         </View>
   
         <View style={styles.wheel}>
-          {/* Add your wheel component here */}
+        <Wheel tasks={tasksForWheel} />
         </View>
-  
-        <TouchableOpacity style={styles.addButton} onPress={() => {/* Logic to add a task */}}>
-          <Text>Spin!</Text>
-        </TouchableOpacity>
+
       
         <TouchableOpacity onPress={showDatePickerModal} style={styles.dateDisplay}>
           <Text style={styles.dateText}>
@@ -270,11 +409,13 @@ const handleUpdateTask = async () => {
               
         <View style={styles.taskList}>
           {displayedTasks.map((task) => (
-            <TouchableOpacity 
-              key={task.id} 
-              style={styles.taskItem}
-              onPress={() => toggleTaskCompletion(task.id)}
-            >
+            // <TouchableOpacity 
+            //   key={task.id} 
+            //   style={styles.taskItem}
+            //   onPress={() => toggleTaskCompletion(task.id)}
+            // >
+            <View key={task.id} style={styles.taskItem}>
+                        <CustomCheckbox taskId={task.id} />
               <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
                 {task.name}
               </Text>
@@ -320,7 +461,8 @@ const handleUpdateTask = async () => {
       </View>
     </View>
   </Modal>
-            </TouchableOpacity>
+            {/* </TouchableOpacity> */}
+            </View>
           ))}
         </View>
   
