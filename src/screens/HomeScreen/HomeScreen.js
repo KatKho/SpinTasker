@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -7,7 +7,6 @@ import styles from './styles';
 import { app } from '../../firebase/config'; 
 import Svg, { Path, G, Polygon } from 'react-native-svg';
 import { Animated } from 'react-native';
-import { useRef } from 'react';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
@@ -16,6 +15,8 @@ export default function HomeScreen({ navigation, route }) {
   const spinValue = useRef(new Animated.Value(0)).current;
   const pointerSize = 30;
   const wheelSize = 200;
+  const finalAngleRef = useRef(0);
+  const extraSpins = 5;
 
   // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -29,25 +30,35 @@ export default function HomeScreen({ navigation, route }) {
   const [currentTask, setCurrentTask] = useState(null);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [winningTaskId, setWinningTaskId] = useState(null);
+  const [winningColor, setWinningColor] = useState('black');
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
 
-  // Function to fetch tasks from Firestore
-  const fetchTasks = async () => {
-    // console.log("Fetching tasks for userID:", userUID);
+// Function to fetch tasks from Firestore
+const fetchTasks = async () => {
     try {
-    const q = query(collection(db, "tasks"), where("userId", "==", userUID));
-    const querySnapshot = await getDocs(q);
-    const tasks = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    setAllTasks(tasks);
-    updateDisplayedTasks(selectedDate);
+      const q = query(collection(db, "tasks"), where("userId", "==", userUID));
+      const querySnapshot = await getDocs(q);
+      const tasksWithColors = querySnapshot.docs.map((doc) => {
+        const taskData = doc.data();
+        // Assign a color if it doesn't have one, else use the existing color
+        taskData.color = taskData.color || getRandomColor();
+        return {
+          id: doc.id,
+          ...taskData
+        };
+      });
+      setAllTasks(tasksWithColors); // Update the tasks with colors
+      updateDisplayedTasks(selectedDate);
     } catch (error) {
-    console.error("Error fetching tasks: ", error);
-  }
+      console.error("Error fetching tasks: ", error);
+    }
   };
+  
+  useEffect(() => {
+    fetchTasks();
+  }, [userUID]); // Runs only when the userUID changes
+  
 
 // Effect to fetch tasks when userUID changes
 useEffect(() => {
@@ -221,13 +232,16 @@ const handleUpdateTask = async () => {
         return color;
       };
 
+      const assignColorsToTasks = (tasks) => {
+        return tasks.map(task => ({ ...task, color: getRandomColor() }));
+      };
+
       const PieSlice = ({ color, angle, index, tasksLength }) => {
-        // const fillColor = task.id === winningTaskId ? '#FFFF00' : color;
         const radius = 100;
         const pathData = tasksLength === 1
           ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
           : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
-      
+        
         return <Path d={pathData} fill={color} />;
       };
       
@@ -257,30 +271,28 @@ const handleUpdateTask = async () => {
       }
       
       const Wheel = ({ tasks }) => {
-        const radius = 100; 
-        const angle = 360 / (tasks.length || 1); 
+        const radius = 100;
+        const angle = 360 / (tasks.length || 1);
       
+        // Use tasks directly without reassigning colors
         return (
           <View style={styles.wheelContainer}>
             <Animated.View
               style={{
-                transform: [{ rotate: spin }], // Bind the rotation to the animated value
+                transform: [{ rotate: spin }],
               }}
             >
               <Svg height={wheelSize} width={wheelSize} viewBox={`0 0 ${wheelSize} ${wheelSize}`}>
                 <G transform={`translate(0, 0)`}>
-                  {tasks.map((task, index) => {
-                    const backgroundColor = task.id === winningTaskId ? 'winningColor' : getRandomColor();
-                    return (
-                      <PieSlice
-                        key={task.id}
-                        color={backgroundColor}
-                        angle={angle}
-                        index={index}
-                        tasksLength={tasks.length}
-                      />
-                    );
-                  })}
+                  {tasks.map((task, index) => (
+                    <PieSlice
+                      key={task.id}
+                      color={task.color} // Color is already assigned, use as is
+                      angle={angle}
+                      index={index}
+                      tasksLength={tasks.length}
+                    />
+                  ))}
                 </G>
               </Svg>
             </Animated.View>
@@ -289,13 +301,14 @@ const handleUpdateTask = async () => {
               width={pointerSize}
               style={{
                 position: 'absolute',
-                top: radius - 50, // Position at the top of the wheel
-                left: radius - (pointerSize / 2), // Center horizontally
+                top: radius - 50,
+                left: radius - (pointerSize / 2),
               }}
             >
               <Polygon
                 points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                fill="black" // Pointer color
+                // fill={winningColor} // Use the winning color for the pointer
+                fill='black'
               />
             </Svg>
             <TouchableOpacity
@@ -309,29 +322,41 @@ const handleUpdateTask = async () => {
         );
       };
       
-// Function to start the spin animation
-const handleSpin = () => {
-    // Set up the animation
-    Animated.timing(spinValue, {
-      toValue: 1, // Arbitrary value to represent the end of the animation
-      duration: 2000, // Duration of the spin in milliseconds
-      useNativeDriver: true, // Use native driver for better performance
-    }).start(() => {
-      // Animation complete callback
-      spinValue.setValue(0); // Reset the animation
-      const randomIndex = Math.floor(Math.random() * tasksForWheel.length);
-      const winningTask = tasksForWheel[randomIndex];
-      setWinningTaskId(winningTask.id);
-    });
-  };
-
-  const spin = spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '3600deg'], // Define the degrees of rotation
-  });
-  
       
 
+      const handleSpin = () => {
+        // Calculate the angle for each section
+        // const sectionAngle = 360 / tasksForWheel.length;
+      
+        // Choose a random section to stop
+        // const randomSection = Math.floor(Math.random() * tasksForWheel.length);
+      
+        const finalAngle = 900 + Math.random() * (2000 - 900);
+
+        // Update the reference to the final angle for the next spin
+        finalAngleRef.current = finalAngle;
+        console.log(finalAngleRef.current);
+      
+        // Start the animation
+        Animated.timing(spinValue, {
+          toValue: finalAngle / 360,
+          duration: 8000, 
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }).start(() => {
+          // Set the winning task ID and color after the wheel stops
+        //   const winningTask = tasksForWheel[randomSection];
+        //   setWinningTaskId(winningTask.id);
+        //   setWinningColor(winningTask.color);
+        });
+      };
+    
+    // Interpolate the spin value to create a rotation transform
+    const spin = spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', `${finalAngleRef.current}deg`],
+    });
+  
       return (
 
         <View style={styles.container}>
