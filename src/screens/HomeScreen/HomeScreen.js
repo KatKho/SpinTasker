@@ -30,6 +30,8 @@ export default function HomeScreen({ navigation, route }) {
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [winningTaskId, setWinningTaskId] = useState(null);
   const [winningColor, setWinningColor] = useState('black');
+  const [isFirstSpin, setIsFirstSpin] = useState(true);
+
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
   
@@ -315,21 +317,23 @@ const handleUpdateTask = async () => {
         const radius = 100;
         const angle = 360 / (tasks.length || 1);
       
-        // Use tasks directly without reassigning colors
+        // Define the spin animation
+        const spin = spinValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', `${finalAngleRef.current * 360}deg`],
+          });
+        
+      
         return (
           <View style={styles.wheelContainer}>
-            <Animated.View
-              style={{
-                transform: [{ rotate: spin }],
-              }}
-            >
+            <Animated.View style={{ transform: [{ rotate: spin }] }}>
               <Svg height={wheelSize} width={wheelSize} viewBox={`0 0 ${wheelSize} ${wheelSize}`}>
                 <G transform={`translate(0, 0)`}>
                   {tasks.map((task, index) => (
                     <PieSlice
                       key={task.id}
                       task={task}
-                      color={task.color} 
+                      color={task.color}
                       angle={angle}
                       index={index}
                       tasksLength={tasks.length}
@@ -349,8 +353,7 @@ const handleUpdateTask = async () => {
             >
               <Polygon
                 points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                // fill={winningColor} // Use the winning color for the pointer
-                fill='black'
+                fill='black' // Use black for the pointer
               />
             </Svg>
             <TouchableOpacity
@@ -364,49 +367,58 @@ const handleUpdateTask = async () => {
         );
       };
       
+      
       const handleSpin = () => {
-        // Define the full rotations for the animation
-        const fullRotations = 5 + Math.floor(Math.random() * 10); // At least 5 full rotations, and up to 2 additional ones
-        const randomDegrees = Math.random() * 360; // Additional random degrees from 0 to 360
-      
-        // This will be the final angle in degrees that the animation will visually rotate to
+        console.log("Spin clicked");
+        spinValue.setValue(0); // Reset the spin value to 0
+    
+        const fullRotations = 5 + Math.floor(Math.random() * 10);
+        const randomDegrees = Math.random() * 360;
         const visualFinalAngle = fullRotations * 360 + randomDegrees;
-        // We only care about where the wheel ends, which is the remainder of dividing by 360
+    
         finalAngleRef.current = visualFinalAngle % 360;
-      
+    
+        console.log(`Starting animation with final angle: ${finalAngleRef.current}`);
+    
         Animated.timing(spinValue, {
-          toValue: visualFinalAngle / 360, // Use the visual final angle for the animation
-          duration: 8000,
+          toValue: visualFinalAngle / 360,
+          duration: 6000,
           easing: Easing.out(Easing.ease),
           useNativeDriver: true,
         }).start(() => {
+          console.log("Animation completed");
+    
           // Calculate the index of the section the pointer is pointing to
-          const numberOfSections = tasksForWheel.length;
-          const sectionAngle = 360 / numberOfSections;
-          let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
-          winningIndex = numberOfSections - (winningIndex + 1); // Adjust for the array indexing
+        //   const numberOfSections = tasksForWheel.length;
+        //   const sectionAngle = 360 / numberOfSections;
+        //   let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
+        //   winningIndex = numberOfSections - (winningIndex + 1); // Adjust for the array indexing
       
-          // Set the winning task based on the winning index
-          const winningTask = tasksForWheel[winningIndex];
+        //   // Set the winning task based on the winning index
+        //   const winningTask = tasksForWheel[winningIndex];
       
-          // Delay setting the state until after the alert is closed
-          Alert.alert("Winner", `The winning task is: ${winningTask.name}`, [
-            {
-              text: "OK",
-              onPress: () => {
-                setWinningTaskId(winningTask.id);
-                setWinningColor(winningTask.color);
-              },
-            },
-          ]);
+        //   // Delay setting the state until after the alert is closed
+        //   Alert.alert("Winner", `The winning task is: ${winningTask.name}`, [
+        //     {
+        //       text: "OK",
+        //       onPress: () => {
+        //         setWinningTaskId(winningTask.id);
+        //         setWinningColor(winningTask.color);
+        //       },
+        //     },
+        //   ]);
         });
       };
+      useEffect(() => {
+        console.log("Selected tasks: ", selectedTasks);
+        if (isFirstSpin && selectedTasks.length > 0) {
+          console.log("Initial spin triggered.");
+          handleSpin();
+          setIsFirstSpin(false); // Prevent future automatic spins
+        }
+      }, [selectedTasks]);
       
-      // Now, update the interpolate function to use finalAngleRef.current
-      const spin = spinValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', `${finalAngleRef.current}deg`],
-      });
+      
       
       
       return (
