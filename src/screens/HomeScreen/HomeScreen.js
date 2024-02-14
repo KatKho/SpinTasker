@@ -320,7 +320,7 @@ const handleUpdateTask = async () => {
         // Define the spin animation
         const spin = spinValue.interpolate({
             inputRange: [0, 1],
-            outputRange: ['0deg', `${finalAngleRef.current * 360}deg`],
+            outputRange: ['0deg', `360deg`],
           });
         
       
@@ -372,7 +372,8 @@ const handleUpdateTask = async () => {
         console.log("Spin clicked");
         spinValue.setValue(0); // Reset the spin value to 0
     
-        const fullRotations = 5 + Math.floor(Math.random() * 10);
+        const fullRotations = 3 + Math.floor(Math.random() * 6);
+        console.log(fullRotations);
         const randomDegrees = Math.random() * 360;
         const visualFinalAngle = fullRotations * 360 + randomDegrees;
     
@@ -382,8 +383,8 @@ const handleUpdateTask = async () => {
     
         Animated.timing(spinValue, {
           toValue: visualFinalAngle / 360,
-          duration: 6000,
-          easing: Easing.out(Easing.ease),
+          duration: 5000,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }).start(() => {
           console.log("Animation completed");
