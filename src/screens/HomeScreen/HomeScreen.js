@@ -32,18 +32,35 @@ export default function HomeScreen({ navigation, route }) {
   const [winningColor, setWinningColor] = useState('black');
   const [isFirstSpin, setIsFirstSpin] = useState(true);
 
-
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
-  
+//   const baseColors = [
+//     '#FFC0CB', // Pink
+//     // '#FFDAB9', // Peach Puff
+//     '#E6E6FA', // Lavender
+//     '#D8BFD8', // Thistle
+//     '#DEB887', // Burlywood
+//     '#EEE8AA', // Pale Golden Rod
+//     '#F0E68C', // Khaki
+//     '#F5DEB3', // Wheat
+//     '#F5F5DC', // Beige
+//     '#FAFAD2', // Light Golden Rod Yellow
+//     '#FFF0F5', // Lavender Blush
+//     '#FFE4E1', // Misty Rose
+//     '#FFEFD5', // Papaya Whip
+//     '#FFF5EE', // Sea Shell
+//     '#FFFACD'  // Lemon Chiffon
+//   ];
+
 
 // Function to fetch tasks from Firestore
 const fetchTasks = async () => {
     try {
       const q = query(collection(db, "tasks"), where("userId", "==", userUID));
       const querySnapshot = await getDocs(q);
-      const tasksWithColors = querySnapshot.docs.map((doc) => {
+      const tasksWithColors = querySnapshot.docs.map((doc, index) => {
         const taskData = doc.data();
-        // Assign a color if it doesn't have one, else use the existing color
+        // const colorIndex = index % baseColors.length; 
+        // taskData.color = taskData.color || baseColors[colorIndex];
         taskData.color = taskData.color || getRandomColor('pastel');
         return {
           id: doc.id,
@@ -179,6 +196,8 @@ const handleUpdateTask = async () => {
       await deleteTask(currentTask.id);
       setIsEditModalVisible(false);
       setCurrentTask(null);
+      setTaskName('');
+      setTaskDescription('');
     }
   };
 
@@ -225,66 +244,63 @@ const handleUpdateTask = async () => {
         );
     };
 
+    const usedHues = new Set();
+
     const getRandomColor = (theme) => {
         let hue;
-        let saturation = Math.random() * 100;
-        let lightness = 50; // Adjust for lighter or darker colors
+        let saturation;
+        let lightness;
+        
+        // Attempt to find a unique hue that hasn't been used
+        do {
+            switch(theme) {
+                case 'pastel':
+                    // Pastel colors: high lightness and saturation
+                    hue = Math.random() * 360; // Full range of hues
+                    break;
+                default:
+                    // Default to full range of hues
+                    hue = Math.random() * 360;
+            }
+        } while (isHueTooClose(hue, usedHues, 3)); // Check if the hue is too close to others
     
-        switch(theme) {
-            case 'nature':
-                // Green, brown hues
-                hue = Math.random() * (90 - 60) + 60; // Random hue between 60 and 90
-                break;
-            case 'ocean':
-                // Blue, teal hues
-                hue = Math.random() * (210 - 180) + 180; // Random hue between 180 and 210
-                break;
-             case 'pastel':
-            // Pastel colors: high lightness and saturation
-            hue = Math.random() * 360; // Full range of hues
+        usedHues.add(Math.floor(hue)); // Add the hue to the set of used hues
+    
+        // Define saturation and lightness based on the theme
+        if (theme === 'pastel') {
             saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
-            lightness = Math.random() * (100 - 80) + 80; // Lightness between 80% and 100%
-            break;
-            default:
-                // Default to full range of hues
-                hue = Math.random() * 360;
+            lightness = Math.random() * (95 - 80) + 80; // Lightness between 80% and 100%
+        } else {
+            saturation = Math.random() * 100;
+            lightness = 50;
         }
     
-        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        return `hsl(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(lightness)}%)`;
     };
-
-    //   const assignColorsToTasks = (tasks) => {
-    //     return tasks.map(task => ({ ...task, color: getRandomColor() }));
-    //   };
+    
+    // Function to check if the newly generated hue is too close to any used hues
+    const isHueTooClose = (newHue, usedHues, minDifference) => {
+        for (let usedHue of usedHues) {
+            if (Math.abs(newHue - usedHue) < minDifference || Math.abs(newHue - usedHue) > 360 - minDifference) {
+                return true; // Hue is too close to a used hue
+            }
+        }
+        return false; // Hue is sufficiently different
+    };
+    
+    const resetUsedHues = () => {
+        usedHues.clear();
+    };
 
       const PieSlice = ({ color, angle, index, tasksLength, task }) => {
         const radius = 100;
         const pathData = tasksLength === 1
           ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
           : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
-        
-          // Calculate the angle for text rotation
-        const textRotation = index * angle + angle / 2;
-        // Calculate text position
-        const textRadius = radius * 0.8; // Adjust to place text inside the slice
-        const textX = radius + textRadius * Math.cos((textRotation - 90) * Math.PI / 180);
-        const textY = radius + textRadius * Math.sin((textRotation - 90) * Math.PI / 180);
-  
         return (
-            <G>
+        <G>
       <Path d={pathData} fill={color} />
-      {/* <SVGText
-  x={textX}
-  y={textY}
-  fill="white"
-  fontSize="16"
-  fontWeight="bold"
-  textAnchor="middle"
-  alignmentBaseline="middle"
->
-  {task.name}
-</SVGText> */}
-    </G>
+       </G>
           );
         };
       
@@ -372,7 +388,7 @@ const handleUpdateTask = async () => {
         console.log("Spin clicked");
         spinValue.setValue(0); // Reset the spin value to 0
     
-        const fullRotations = 3 + Math.floor(Math.random() * 6);
+        const fullRotations = 1 + Math.floor(Math.random() * 6);
         console.log(fullRotations);
         const randomDegrees = Math.random() * 360;
         const visualFinalAngle = fullRotations * 360 + randomDegrees;
@@ -389,39 +405,37 @@ const handleUpdateTask = async () => {
         }).start(() => {
           console.log("Animation completed");
     
-          // Calculate the index of the section the pointer is pointing to
-        //   const numberOfSections = tasksForWheel.length;
-        //   const sectionAngle = 360 / numberOfSections;
-        //   let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
-        //   winningIndex = numberOfSections - (winningIndex + 1); // Adjust for the array indexing
+        //   Calculate the index of the section the pointer is pointing to
+          const numberOfSections = tasksForWheel.length;
+          const sectionAngle = 360 / numberOfSections;
+          let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
+          winningIndex = numberOfSections - (winningIndex + 1); // Adjust for the array indexing
       
-        //   // Set the winning task based on the winning index
-        //   const winningTask = tasksForWheel[winningIndex];
+          // Set the winning task based on the winning index
+          const winningTask = tasksForWheel[winningIndex];
       
-        //   // Delay setting the state until after the alert is closed
-        //   Alert.alert("Winner", `The winning task is: ${winningTask.name}`, [
-        //     {
-        //       text: "OK",
-        //       onPress: () => {
-        //         setWinningTaskId(winningTask.id);
-        //         setWinningColor(winningTask.color);
-        //       },
-        //     },
-        //   ]);
+          // Delay setting the state until after the alert is closed
+          Alert.alert("Winner", `It is time to: ${winningTask.name}`, [
+            {
+              text: "OK",
+              onPress: () => {
+                setWinningTaskId(winningTask.id);
+                setWinningColor(winningTask.color);
+              },
+            },
+          ]);
         });
       };
       useEffect(() => {
         console.log("Selected tasks: ", selectedTasks);
         if (isFirstSpin && selectedTasks.length > 0) {
           console.log("Initial spin triggered.");
-          handleSpin();
-          setIsFirstSpin(false); // Prevent future automatic spins
+        //   handleSpin();
+          setIsFirstSpin(false); 
         }
       }, [selectedTasks]);
-      
-      
-      
-      
+    
+
       return (
 
         <View style={styles.container}>
