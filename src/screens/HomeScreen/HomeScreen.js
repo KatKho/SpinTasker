@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
 import { app } from '../../firebase/config'; 
-import Svg, { Path, G, Polygon } from 'react-native-svg';
+import Svg, { Path, G, Polygon, Text as SVGText } from 'react-native-svg';
 import { Animated } from 'react-native';
 
 export default function HomeScreen({ navigation, route }) {
@@ -16,7 +16,6 @@ export default function HomeScreen({ navigation, route }) {
   const pointerSize = 30;
   const wheelSize = 200;
   const finalAngleRef = useRef(0);
-  const extraSpins = 5;
 
   // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -31,18 +30,38 @@ export default function HomeScreen({ navigation, route }) {
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [winningTaskId, setWinningTaskId] = useState(null);
   const [winningColor, setWinningColor] = useState('black');
+  const [isFirstSpin, setIsFirstSpin] = useState(true);
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
+//   const baseColors = [
+//     '#FFC0CB', // Pink
+//     // '#FFDAB9', // Peach Puff
+//     '#E6E6FA', // Lavender
+//     '#D8BFD8', // Thistle
+//     '#DEB887', // Burlywood
+//     '#EEE8AA', // Pale Golden Rod
+//     '#F0E68C', // Khaki
+//     '#F5DEB3', // Wheat
+//     '#F5F5DC', // Beige
+//     '#FAFAD2', // Light Golden Rod Yellow
+//     '#FFF0F5', // Lavender Blush
+//     '#FFE4E1', // Misty Rose
+//     '#FFEFD5', // Papaya Whip
+//     '#FFF5EE', // Sea Shell
+//     '#FFFACD'  // Lemon Chiffon
+//   ];
+
 
 // Function to fetch tasks from Firestore
 const fetchTasks = async () => {
     try {
       const q = query(collection(db, "tasks"), where("userId", "==", userUID));
       const querySnapshot = await getDocs(q);
-      const tasksWithColors = querySnapshot.docs.map((doc) => {
+      const tasksWithColors = querySnapshot.docs.map((doc, index) => {
         const taskData = doc.data();
-        // Assign a color if it doesn't have one, else use the existing color
-        taskData.color = taskData.color || getRandomColor();
+        // const colorIndex = index % baseColors.length; 
+        // taskData.color = taskData.color || baseColors[colorIndex];
+        taskData.color = taskData.color || getRandomColor('pastel');
         return {
           id: doc.id,
           ...taskData
@@ -177,6 +196,8 @@ const handleUpdateTask = async () => {
       await deleteTask(currentTask.id);
       setIsEditModalVisible(false);
       setCurrentTask(null);
+      setTaskName('');
+      setTaskDescription('');
     }
   };
 
@@ -223,27 +244,55 @@ const handleUpdateTask = async () => {
         );
     };
 
-    const getRandomColor = () => {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-          color += letters[Math.floor(Math.random() * 16)];
+    const usedHues = new Set();
+
+    const getRandomColor = (theme) => {
+        let hue;
+        let saturation;
+        let lightness;
+        
+        // Attempt to find a unique hue that hasn't been used
+        do {
+            switch(theme) {
+
+                case 'pastel':
+                    // Pastel colors: high lightness and saturation
+                    hue = Math.random() * 360; // Full range of hues
+                    break;
+                default:
+                    // Default to full range of hues
+                    hue = Math.random() * 360;
+            }
+        } while (usedHues.has(Math.floor(hue))); // Continue if the hue has been used
+        usedHues.add(Math.floor(hue)); // Add the hue to the set of used hues
+    
+        // Define saturation and lightness based on the theme
+        if (theme === 'pastel') {
+            saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
+            lightness = Math.random() * (100 - 80) + 80; // Lightness between 80% and 100%
+        } else {
+            saturation = Math.random() * 100;
+            lightness = 50;
         }
-        return color;
-      };
+    
+        return `hsl(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(lightness)}%)`;
+    };
 
-      const assignColorsToTasks = (tasks) => {
-        return tasks.map(task => ({ ...task, color: getRandomColor() }));
-      };
+    const resetUsedHues = () => {
+        usedHues.clear();
+    };
 
-      const PieSlice = ({ color, angle, index, tasksLength }) => {
+      const PieSlice = ({ color, angle, index, tasksLength, task }) => {
         const radius = 100;
         const pathData = tasksLength === 1
           ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
           : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
-        
-        return <Path d={pathData} fill={color} />;
-      };
+        return (
+        <G>
+      <Path d={pathData} fill={color} />
+       </G>
+          );
+        };
       
       const describeArc = (x, y, radius, startAngle, endAngle) => {
         const start = polarToCartesian(x, y, radius, endAngle);
@@ -274,20 +323,23 @@ const handleUpdateTask = async () => {
         const radius = 100;
         const angle = 360 / (tasks.length || 1);
       
-        // Use tasks directly without reassigning colors
+        // Define the spin animation
+        const spin = spinValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', `360deg`],
+          });
+        
+      
         return (
           <View style={styles.wheelContainer}>
-            <Animated.View
-              style={{
-                transform: [{ rotate: spin }],
-              }}
-            >
+            <Animated.View style={{ transform: [{ rotate: spin }] }}>
               <Svg height={wheelSize} width={wheelSize} viewBox={`0 0 ${wheelSize} ${wheelSize}`}>
                 <G transform={`translate(0, 0)`}>
                   {tasks.map((task, index) => (
                     <PieSlice
                       key={task.id}
-                      color={task.color} // Color is already assigned, use as is
+                      task={task}
+                      color={task.color}
                       angle={angle}
                       index={index}
                       tasksLength={tasks.length}
@@ -307,8 +359,7 @@ const handleUpdateTask = async () => {
             >
               <Polygon
                 points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                // fill={winningColor} // Use the winning color for the pointer
-                fill='black'
+                fill='black' // Use black for the pointer
               />
             </Svg>
             <TouchableOpacity
@@ -323,40 +374,58 @@ const handleUpdateTask = async () => {
       };
       
       
-
       const handleSpin = () => {
-        // Calculate the angle for each section
-        // const sectionAngle = 360 / tasksForWheel.length;
-      
-        // Choose a random section to stop
-        // const randomSection = Math.floor(Math.random() * tasksForWheel.length);
-      
-        const finalAngle = 900 + Math.random() * (2000 - 900);
-
-        // Update the reference to the final angle for the next spin
-        finalAngleRef.current = finalAngle;
-        console.log(finalAngleRef.current);
-      
-        // Start the animation
+        console.log("Spin clicked");
+        spinValue.setValue(0); // Reset the spin value to 0
+    
+        const fullRotations = 1 + Math.floor(Math.random() * 6);
+        console.log(fullRotations);
+        const randomDegrees = Math.random() * 360;
+        const visualFinalAngle = fullRotations * 360 + randomDegrees;
+    
+        finalAngleRef.current = visualFinalAngle % 360;
+    
+        console.log(`Starting animation with final angle: ${finalAngleRef.current}`);
+    
         Animated.timing(spinValue, {
-          toValue: finalAngle / 360,
-          duration: 8000, 
+          toValue: visualFinalAngle / 360,
+          duration: 5000,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }).start(() => {
-          // Set the winning task ID and color after the wheel stops
-        //   const winningTask = tasksForWheel[randomSection];
-        //   setWinningTaskId(winningTask.id);
-        //   setWinningColor(winningTask.color);
+          console.log("Animation completed");
+    
+        //   Calculate the index of the section the pointer is pointing to
+          const numberOfSections = tasksForWheel.length;
+          const sectionAngle = 360 / numberOfSections;
+          let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
+          winningIndex = numberOfSections - (winningIndex + 1); // Adjust for the array indexing
+      
+          // Set the winning task based on the winning index
+          const winningTask = tasksForWheel[winningIndex];
+      
+          // Delay setting the state until after the alert is closed
+          Alert.alert("Winner", `It is time to: ${winningTask.name}`, [
+            {
+              text: "OK",
+              onPress: () => {
+                setWinningTaskId(winningTask.id);
+                setWinningColor(winningTask.color);
+              },
+            },
+          ]);
         });
       };
+      useEffect(() => {
+        console.log("Selected tasks: ", selectedTasks);
+        if (isFirstSpin && selectedTasks.length > 0) {
+          console.log("Initial spin triggered.");
+        //   handleSpin();
+          setIsFirstSpin(false); 
+        }
+      }, [selectedTasks]);
     
-    // Interpolate the spin value to create a rotation transform
-    const spin = spinValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', `${finalAngleRef.current}deg`],
-    });
-  
+
       return (
 
         <View style={styles.container}>
@@ -414,7 +483,13 @@ const handleUpdateTask = async () => {
             //   style={styles.taskItem}
             //   onPress={() => toggleTaskCompletion(task.id)}
             // >
-            <View key={task.id} style={styles.taskItem}>
+            <View
+            key={task.id}
+            style={[
+              styles.taskItem,
+              { backgroundColor: selectedTasks.includes(task.id) ? task.color : 'transparent' } // Apply the color here
+            ]}
+          >
                         <CustomCheckbox taskId={task.id} />
               <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
                 {task.name}

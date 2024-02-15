@@ -24,11 +24,11 @@ export default StyleSheet.create({
         // borderColor: '#64b5f6',
         backgroundColor: 'lightblue'
       },
-      wheelText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#64b5f6',
-      },
+      // wheelText: {
+      //   fontSize: 18,
+      //   fontWeight: 'bold',
+      //   color: '#64b5f6',
+      // },
       taskList: {
         flex: 1,
         marginTop: 20,
@@ -103,7 +103,6 @@ export default StyleSheet.create({
       fontWeight: 'bold',
       textAlign: 'center'
       },
-      // ... other styles
   
       taskModal: {
           backgroundColor: 'white',
@@ -227,7 +226,7 @@ export default StyleSheet.create({
     height: 60, // Adjust size as needed
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffbe98', // Button color
+    backgroundColor: '#FFDFBA', // Button color
     borderRadius: 30, // Half of width/height
     top: '50%', // Center vertically
     left: '50%', // Center horizontally
