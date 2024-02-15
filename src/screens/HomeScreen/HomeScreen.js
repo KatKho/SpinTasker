@@ -254,6 +254,7 @@ const handleUpdateTask = async () => {
         // Attempt to find a unique hue that hasn't been used
         do {
             switch(theme) {
+
                 case 'pastel':
                     // Pastel colors: high lightness and saturation
                     hue = Math.random() * 360; // Full range of hues
@@ -262,14 +263,13 @@ const handleUpdateTask = async () => {
                     // Default to full range of hues
                     hue = Math.random() * 360;
             }
-        } while (isHueTooClose(hue, usedHues, 3)); // Check if the hue is too close to others
-    
+        } while (usedHues.has(Math.floor(hue))); // Continue if the hue has been used
         usedHues.add(Math.floor(hue)); // Add the hue to the set of used hues
     
         // Define saturation and lightness based on the theme
         if (theme === 'pastel') {
             saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
-            lightness = Math.random() * (95 - 80) + 80; // Lightness between 80% and 100%
+            lightness = Math.random() * (100 - 80) + 80; // Lightness between 80% and 100%
         } else {
             saturation = Math.random() * 100;
             lightness = 50;
@@ -277,17 +277,7 @@ const handleUpdateTask = async () => {
     
         return `hsl(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(lightness)}%)`;
     };
-    
-    // Function to check if the newly generated hue is too close to any used hues
-    const isHueTooClose = (newHue, usedHues, minDifference) => {
-        for (let usedHue of usedHues) {
-            if (Math.abs(newHue - usedHue) < minDifference || Math.abs(newHue - usedHue) > 360 - minDifference) {
-                return true; // Hue is too close to a used hue
-            }
-        }
-        return false; // Hue is sufficiently different
-    };
-    
+
     const resetUsedHues = () => {
         usedHues.clear();
     };
