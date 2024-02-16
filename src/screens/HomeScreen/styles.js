@@ -22,7 +22,7 @@ export default StyleSheet.create({
         borderRadius: 100, // Half of the size to make it a circle
         // borderWidth: 5,
         // borderColor: '#64b5f6',
-        backgroundColor: 'lightblue'
+        // backgroundColor: 'lightblue'
       },
       // wheelText: {
       //   fontSize: 18,
@@ -239,4 +239,10 @@ export default StyleSheet.create({
     color: '#000', // Text color
   },
 
+  logo: {
+    flex: 1,
+    height: 400,
+    width: 250,
+    alignSelf: "center",
+},
     })

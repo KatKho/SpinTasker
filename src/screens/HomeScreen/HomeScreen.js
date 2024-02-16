@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -68,7 +68,7 @@ const fetchTasks = async () => {
         };
       });
       setAllTasks(tasksWithColors); // Update the tasks with colors
-      updateDisplayedTasks(selectedDate);
+    //   updateDisplayedTasks(selectedDate);
     } catch (error) {
       console.error("Error fetching tasks: ", error);
     }
@@ -396,6 +396,10 @@ const handleUpdateTask = async () => {
           console.log("Animation completed");
     
         //   Calculate the index of the section the pointer is pointing to
+        if (tasksForWheel.length === 0) {
+            Alert.alert("No Tasks", "There are no tasks to select.");
+            return; // Exit the function if there are no tasks
+          }
           const numberOfSections = tasksForWheel.length;
           const sectionAngle = 360 / numberOfSections;
           let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
@@ -417,7 +421,7 @@ const handleUpdateTask = async () => {
         });
       };
       useEffect(() => {
-        console.log("Selected tasks: ", selectedTasks);
+        // console.log("Selected tasks: ", selectedTasks);
         if (isFirstSpin && selectedTasks.length > 0) {
           console.log("Initial spin triggered.");
         //   handleSpin();
@@ -437,7 +441,18 @@ const handleUpdateTask = async () => {
         </View>
   
         <View style={styles.wheel}>
-        <Wheel tasks={tasksForWheel} />
+                    {
+            tasksForWheel.length > 0 ? (
+                <Wheel tasks={tasksForWheel} />
+            ) : (
+                <View style={styles.placeholderContainer}>
+                <Image
+                    source={require('../../../assets/icon.png')}
+                    style={styles.logo}
+                />
+                </View>
+            )
+            }
         </View>
 
       
