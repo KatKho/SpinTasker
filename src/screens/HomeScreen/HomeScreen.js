@@ -68,7 +68,7 @@ const fetchTasks = async () => {
         };
       });
       setAllTasks(tasksWithColors); // Update the tasks with colors
-    //   updateDisplayedTasks(selectedDate);
+      updateDisplayedTasks(selectedDate);
     } catch (error) {
       console.error("Error fetching tasks: ", error);
     }
@@ -138,6 +138,7 @@ useEffect(() => {
     const currentDate = newSelectedDate || selectedDate;
     setShowDatePicker(Platform.OS === 'ios');
     setSelectedDate(currentDate);
+    setSelectedTasks([]);
     updateDisplayedTasks(currentDate);
   };
 
@@ -412,10 +413,6 @@ const handleUpdateTask = async () => {
           Alert.alert("Winner", `It is time to: ${winningTask.name}`, [
             {
               text: "OK",
-              onPress: () => {
-                setWinningTaskId(winningTask.id);
-                setWinningColor(winningTask.color);
-              },
             },
           ]);
         });
@@ -447,7 +444,7 @@ const handleUpdateTask = async () => {
             ) : (
                 <View style={styles.placeholderContainer}>
                 <Image
-                    source={require('../../../assets/icon.png')}
+                    source={require('../../../assets/icon1.png')}
                     style={styles.logo}
                 />
                 </View>
@@ -493,22 +490,27 @@ const handleUpdateTask = async () => {
               
         <View style={styles.taskList}>
           {displayedTasks.map((task) => (
-            // <TouchableOpacity 
-            //   key={task.id} 
-            //   style={styles.taskItem}
-            //   onPress={() => toggleTaskCompletion(task.id)}
-            // >
+            <TouchableOpacity 
+              key={task.id} 
+            //   style={styles.taskCompleted}
+              onPress={() => toggleTaskCompletion(task.id)}
+            >
             <View
             key={task.id}
             style={[
               styles.taskItem,
-              { backgroundColor: selectedTasks.includes(task.id) ? task.color : 'transparent' } // Apply the color here
+              { 
+                backgroundColor: selectedTasks.includes(task.id) ? task.color : 'transparent'
+              }
             ]}
           >
-                        <CustomCheckbox taskId={task.id} />
-              <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
-                {task.name}
-              </Text>
+            <CustomCheckbox taskId={task.id} />
+            <View style={{ flex: 2, flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={[styles.taskText, task.completed && styles.taskCompleted]}>
+            {task.name}
+            </Text>
+        {task.completed && <View style={styles.taskCompletedLine} />}
+      </View>
               <TouchableOpacity onPress={() => showEditModal(task)}>
     <Text>Edit</Text>
   </TouchableOpacity>
@@ -551,8 +553,8 @@ const handleUpdateTask = async () => {
       </View>
     </View>
   </Modal>
-            {/* </TouchableOpacity> */}
             </View>
+            </TouchableOpacity> 
           ))}
         </View>
   

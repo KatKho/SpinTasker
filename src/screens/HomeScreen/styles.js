@@ -44,10 +44,18 @@ export default StyleSheet.create({
       },
       taskText: {
         fontSize: 16,
+        marginLeft: 10
       },
       taskCompleted: {
         textDecorationLine: 'line-through',
-        color: 'grey',
+      },
+      taskCompletedLine: {
+        position: 'absolute',
+        height: 2, // Height of the line
+        backgroundColor: 'red', // Color of the line
+        width: '120%', // Line width - set to 100% of the container width
+        top: '50%', // Align to the vertical middle of the item
+        marginLeft: -30,
       },
       editText: {
         color: '#64b5f6',
@@ -242,7 +250,7 @@ export default StyleSheet.create({
   logo: {
     flex: 1,
     height: 400,
-    width: 250,
+    width: 300,
     alignSelf: "center",
 },
     })
