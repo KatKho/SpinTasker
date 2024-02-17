@@ -59,16 +59,16 @@ export default StyleSheet.create({
       },
       addButton: {
         backgroundColor: '#64b5f6',
-        borderRadius: 25,
+        borderRadius: 30,
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 18,
         alignSelf: 'center',
-        marginTop: 10,
-        marginBottom: 20,
+        marginTop: 5,
+        marginBottom: 30,
       },
       addButtonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 30,
         fontWeight: 'bold',
       },
       dateText: {

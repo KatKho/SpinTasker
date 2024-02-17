@@ -498,7 +498,6 @@ const handleUpdateTask = async () => {
             renderItem={({ item: task }) => (
             <TouchableOpacity 
               key={task.id} 
-            //   style={styles.taskCompleted}
               onPress={() => toggleTaskCompletion(task.id)}
             >
             <View
@@ -518,7 +517,7 @@ const handleUpdateTask = async () => {
         {task.completed && <View style={styles.taskCompletedLine} />}
       </View>
               <TouchableOpacity onPress={() => showEditModal(task)}>
-    <Text style={{ fontSize: 24}}>✎</Text>
+    <Text style={{ fontSize: 25}}>✐</Text>
   </TouchableOpacity>
 
     
@@ -567,7 +566,7 @@ const handleUpdateTask = async () => {
         </View>
   
         <TouchableOpacity style={styles.addButton} onPress={toggleTaskModal}>
-        <Text>Add Task</Text>
+        <Text style={styles.addButtonText} >+</Text>
         </TouchableOpacity>
   
         <Modal
