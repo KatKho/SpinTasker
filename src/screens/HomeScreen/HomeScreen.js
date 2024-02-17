@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, FlatList } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -33,46 +33,28 @@ export default function HomeScreen({ navigation, route }) {
   const [isFirstSpin, setIsFirstSpin] = useState(true);
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
-//   const baseColors = [
-//     '#FFC0CB', // Pink
-//     // '#FFDAB9', // Peach Puff
-//     '#E6E6FA', // Lavender
-//     '#D8BFD8', // Thistle
-//     '#DEB887', // Burlywood
-//     '#EEE8AA', // Pale Golden Rod
-//     '#F0E68C', // Khaki
-//     '#F5DEB3', // Wheat
-//     '#F5F5DC', // Beige
-//     '#FAFAD2', // Light Golden Rod Yellow
-//     '#FFF0F5', // Lavender Blush
-//     '#FFE4E1', // Misty Rose
-//     '#FFEFD5', // Papaya Whip
-//     '#FFF5EE', // Sea Shell
-//     '#FFFACD'  // Lemon Chiffon
-//   ];
-
 
 // Function to fetch tasks from Firestore
 const fetchTasks = async () => {
     try {
       const q = query(collection(db, "tasks"), where("userId", "==", userUID));
       const querySnapshot = await getDocs(q);
-      const tasksWithColors = querySnapshot.docs.map((doc, index) => {
-        const taskData = doc.data();
-        // const colorIndex = index % baseColors.length; 
-        // taskData.color = taskData.color || baseColors[colorIndex];
-        taskData.color = taskData.color || getRandomColor('pastel');
-        return {
+      const tasksWithColors = querySnapshot.docs
+        .map(doc => ({
           id: doc.id,
-          ...taskData
-        };
-      });
+          ...doc.data(),
+          color: doc.data().color || getRandomColor('pastel')
+        }))
+
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+  
       setAllTasks(tasksWithColors); // Update the tasks with colors
       updateDisplayedTasks(selectedDate);
     } catch (error) {
       console.error("Error fetching tasks: ", error);
     }
   };
+  
   
   useEffect(() => {
     fetchTasks();
@@ -97,11 +79,26 @@ useEffect(() => {
       const taskDate = new Date(task.date);
       return taskDate.toDateString() === newDate.toDateString();
     });
-    setDisplayedTasks(filteredTasks);
+  
+    // Sort tasks so that completed tasks are at the bottom
+    const sortedTasks = filteredTasks.sort((a, b) => {
+      // If 'a' is not completed and 'b' is, 'a' should come first
+      if (!a.completed && b.completed) {
+        return -1;
+      }
+      // If 'a' is completed and 'b' is not, 'b' should come first
+      if (a.completed && !b.completed) {
+        return 1;
+      }
+      // If both have the same completed status, they stay in the same order
+      return 0;
+    });
+  
+    setDisplayedTasks(sortedTasks);
   };
 
-  // Function to add a task
-  const addTask = async () => {
+// Function to add a task
+const addTask = async () => {
     const newTask = {
       userId: userUID,
       name: taskName,
@@ -109,21 +106,23 @@ useEffect(() => {
       completed: false,
       date: selectedDate.toISOString(),
     };
-
+  
     const tasksRef = collection(db, 'tasks');
     try {
       const docRef = await addDoc(tasksRef, newTask);
+      // Add the new task at the end of the array
       setAllTasks(prevTasks => [...prevTasks, { ...newTask, id: docRef.id }]);
       updateDisplayedTasks(selectedDate);
       fetchTasks();
     } catch (error) {
       console.error('Error adding task: ', error);
     }
-
+  
     setTaskName('');
     setTaskDescription('');
     setIsTaskModalVisible(false);
   };
+  
 
   // Function to handle sign-out
   const handleSignOut = async () => {
@@ -138,6 +137,7 @@ useEffect(() => {
     const currentDate = newSelectedDate || selectedDate;
     setShowDatePicker(Platform.OS === 'ios');
     setSelectedDate(currentDate);
+    setSelectedTasks([]);
     updateDisplayedTasks(currentDate);
   };
 
@@ -212,6 +212,8 @@ const handleUpdateTask = async () => {
     };
 
     const toggleTaskModal = () => {
+        setTaskName('');
+        setTaskDescription('');      
     setIsTaskModalVisible(!isTaskModalVisible);
     };
       
@@ -239,7 +241,7 @@ const handleUpdateTask = async () => {
                 style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
                 onPress={() => handleCheckboxToggle(taskId)}
             >
-                {isChecked && <Text style={styles.checkboxCheckmark}>✔</Text>}
+                {isChecked && <Text style={styles.checkboxCheckmark}>♡</Text>}
             </TouchableOpacity>
         );
     };
@@ -269,7 +271,7 @@ const handleUpdateTask = async () => {
         // Define saturation and lightness based on the theme
         if (theme === 'pastel') {
             saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
-            lightness = Math.random() * (100 - 80) + 80; // Lightness between 80% and 100%
+            lightness = Math.random() * (90 - 75) + 75; // Lightness between 80% and 100%
         } else {
             saturation = Math.random() * 100;
             lightness = 50;
@@ -289,7 +291,9 @@ const handleUpdateTask = async () => {
           : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
         return (
         <G>
-      <Path d={pathData} fill={color} />
+      <Path d={pathData} fill={color} 
+        stroke="#FFFFFF" 
+        strokeWidth={2} />
        </G>
           );
         };
@@ -353,13 +357,13 @@ const handleUpdateTask = async () => {
               width={pointerSize}
               style={{
                 position: 'absolute',
-                top: radius - 50,
+                top: radius - 47,
                 left: radius - (pointerSize / 2),
               }}
             >
               <Polygon
                 points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                fill='black' // Use black for the pointer
+                fill='white' 
               />
             </Svg>
             <TouchableOpacity
@@ -367,7 +371,7 @@ const handleUpdateTask = async () => {
               onPress={handleSpin}
               activeOpacity={1}
             >
-              <Text style={styles.spinButtonText}>Spin</Text>
+              <Text style={styles.spinButtonText}>SPIN</Text>
             </TouchableOpacity>
           </View>
         );
@@ -396,6 +400,10 @@ const handleUpdateTask = async () => {
           console.log("Animation completed");
     
         //   Calculate the index of the section the pointer is pointing to
+        if (tasksForWheel.length === 0) {
+            Alert.alert("No Tasks", "There are no tasks to select.");
+            return; // Exit the function if there are no tasks
+          }
           const numberOfSections = tasksForWheel.length;
           const sectionAngle = 360 / numberOfSections;
           let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
@@ -405,19 +413,15 @@ const handleUpdateTask = async () => {
           const winningTask = tasksForWheel[winningIndex];
       
           // Delay setting the state until after the alert is closed
-          Alert.alert("Winner", `It is time to: ${winningTask.name}`, [
+          Alert.alert("", `${winningTask.name}`, [
             {
               text: "OK",
-              onPress: () => {
-                setWinningTaskId(winningTask.id);
-                setWinningColor(winningTask.color);
-              },
             },
           ]);
         });
       };
       useEffect(() => {
-        console.log("Selected tasks: ", selectedTasks);
+        // console.log("Selected tasks: ", selectedTasks);
         if (isFirstSpin && selectedTasks.length > 0) {
           console.log("Initial spin triggered.");
         //   handleSpin();
@@ -437,7 +441,18 @@ const handleUpdateTask = async () => {
         </View>
   
         <View style={styles.wheel}>
-        <Wheel tasks={tasksForWheel} />
+                    {
+            tasksForWheel.length > 0 ? (
+                <Wheel tasks={tasksForWheel} />
+            ) : (
+                <View style={styles.placeholderContainer}>
+                <Image
+                    source={require('../../../assets/icon2.png')}
+                    style={styles.logo}
+                />
+                </View>
+            )
+            }
         </View>
 
       
@@ -477,27 +492,35 @@ const handleUpdateTask = async () => {
         </Modal>
               
         <View style={styles.taskList}>
-          {displayedTasks.map((task) => (
-            // <TouchableOpacity 
-            //   key={task.id} 
-            //   style={styles.taskItem}
-            //   onPress={() => toggleTaskCompletion(task.id)}
-            // >
+        <FlatList
+            data={displayedTasks}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item: task }) => (
+            <TouchableOpacity 
+              key={task.id} 
+              onPress={() => toggleTaskCompletion(task.id)}
+            >
             <View
             key={task.id}
             style={[
               styles.taskItem,
-              { backgroundColor: selectedTasks.includes(task.id) ? task.color : 'transparent' } // Apply the color here
+              { 
+                backgroundColor: selectedTasks.includes(task.id) ? task.color : 'transparent'
+              }
             ]}
           >
-                        <CustomCheckbox taskId={task.id} />
-              <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
-                {task.name}
-              </Text>
+            <CustomCheckbox taskId={task.id} />
+            <View style={{ flex: 2, flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={[styles.taskText, task.completed && styles.taskCompleted]}>
+            {task.name}
+            </Text>
+        {task.completed && <View style={styles.taskCompletedLine} />}
+      </View>
               <TouchableOpacity onPress={() => showEditModal(task)}>
-    <Text>Edit</Text>
+    <Text style={{ fontSize: 25}}>✐</Text>
   </TouchableOpacity>
-  
+
+    
   <Modal
     visible={isEditModalVisible}
     transparent={true}
@@ -536,13 +559,14 @@ const handleUpdateTask = async () => {
       </View>
     </View>
   </Modal>
-            {/* </TouchableOpacity> */}
             </View>
-          ))}
+            </TouchableOpacity> 
+          )}
+          />
         </View>
   
         <TouchableOpacity style={styles.addButton} onPress={toggleTaskModal}>
-        <Text>Add Task</Text>
+        <Text style={styles.addButtonText} >+</Text>
         </TouchableOpacity>
   
         <Modal

@@ -22,7 +22,7 @@ export default StyleSheet.create({
         borderRadius: 100, // Half of the size to make it a circle
         // borderWidth: 5,
         // borderColor: '#64b5f6',
-        backgroundColor: 'lightblue'
+        // backgroundColor: 'lightblue'
       },
       // wheelText: {
       //   fontSize: 18,
@@ -44,26 +44,31 @@ export default StyleSheet.create({
       },
       taskText: {
         fontSize: 16,
+        marginLeft: 10
       },
-      taskCompleted: {
-        textDecorationLine: 'line-through',
-        color: 'grey',
+      taskCompletedLine: {
+        position: 'absolute',
+        height: 2, // Height of the line
+        backgroundColor: 'red', // Color of the line
+        width: '120%', // Line width - set to 100% of the container width
+        top: '30%', // Align to the vertical middle of the item
+        marginLeft: -34,
       },
       editText: {
         color: '#64b5f6',
       },
       addButton: {
         backgroundColor: '#64b5f6',
-        borderRadius: 25,
+        borderRadius: 30,
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 18,
         alignSelf: 'center',
-        marginTop: 10,
-        marginBottom: 20,
+        marginTop: 5,
+        marginBottom: 30,
       },
       addButtonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 30,
         fontWeight: 'bold',
       },
       dateText: {
@@ -189,21 +194,23 @@ export default StyleSheet.create({
     },
     
     checkboxBase: {
-      width: 20,
-      height: 20,
+      width: 30,
+      height: 30,
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: 4,
+      borderRadius: 1,
       borderWidth: 2,
       borderColor: 'grey',
       backgroundColor: 'transparent',
   },
   checkboxChecked: {
-      backgroundColor: 'lightblue', 
+      backgroundColor: 'white', 
   },
   checkboxCheckmark: {
       fontWeight: 'bold',
-      color: 'white',
+      color: 'red',
+      fontSize: 22
+
   },
   wheelContainer: {
     position: 'relative', // This is important for absolute children
@@ -212,31 +219,42 @@ export default StyleSheet.create({
     justifyContent: 'center', // Centers children vertically in the container
     alignItems: 'center', // Centers children horizontally in the container
   },
-  // wheelSection: {
-  //   // width: 200, // Same as wheelContainer width
-  //   // height: 100, // Half of wheelContainer height
-  //   // // borderTopRightRadius: 100, // Same as wheelContainer borderRadius
-  //   // // borderBottomRightRadius: 100, // Same as wheelContainer borderRadius
-  //   // justifyContent: 'center',
-  //   // alignItems: 'center',
-  // },
   spinButton: {
     position: 'absolute',
-    width: 60, // Adjust size as needed
-    height: 60, // Adjust size as needed
+    width: 70, // Adjust size as needed
+    height: 70, // Adjust size as needed
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFDFBA', // Button color
-    borderRadius: 30, // Half of width/height
+    backgroundColor: '#FFD65C', // Button color
+    borderRadius: 35, // Half of width/height
     top: '50%', // Center vertically
     left: '50%', // Center horizontally
-    marginTop: -30, // Adjust for the size of the button to center
-    marginLeft: -30, // Adjust for the size of the button to center
-    
+    marginTop: -35, // Adjust for the size of the button to center
+    marginLeft: -35, // Adjust for the size of the button to center
+    borderWidth: 5, // Width of the border
+    borderColor: 'white', // Color of the border
+    backgroundColor: '#FFD65C',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4, 
   },
   spinButtonText: {
     fontSize: 16,
-    color: '#000', // Text color
+    color: 'black', // Text color
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4, 
   },
+
+  logo: {
+    flex: 1,
+    height: 450,
+    width: 255,
+    alignSelf: "center",
+},
 
     })

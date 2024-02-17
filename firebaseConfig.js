@@ -1,4 +1,3 @@
-import { API_KEY, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID } from '@env';
 import * as firebase from 'firebase';
 import '@firebase/auth';
 import '@firebase/firestore';
