@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, FlatList } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -33,46 +33,28 @@ export default function HomeScreen({ navigation, route }) {
   const [isFirstSpin, setIsFirstSpin] = useState(true);
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
-//   const baseColors = [
-//     '#FFC0CB', // Pink
-//     // '#FFDAB9', // Peach Puff
-//     '#E6E6FA', // Lavender
-//     '#D8BFD8', // Thistle
-//     '#DEB887', // Burlywood
-//     '#EEE8AA', // Pale Golden Rod
-//     '#F0E68C', // Khaki
-//     '#F5DEB3', // Wheat
-//     '#F5F5DC', // Beige
-//     '#FAFAD2', // Light Golden Rod Yellow
-//     '#FFF0F5', // Lavender Blush
-//     '#FFE4E1', // Misty Rose
-//     '#FFEFD5', // Papaya Whip
-//     '#FFF5EE', // Sea Shell
-//     '#FFFACD'  // Lemon Chiffon
-//   ];
-
 
 // Function to fetch tasks from Firestore
 const fetchTasks = async () => {
     try {
       const q = query(collection(db, "tasks"), where("userId", "==", userUID));
       const querySnapshot = await getDocs(q);
-      const tasksWithColors = querySnapshot.docs.map((doc, index) => {
-        const taskData = doc.data();
-        // const colorIndex = index % baseColors.length; 
-        // taskData.color = taskData.color || baseColors[colorIndex];
-        taskData.color = taskData.color || getRandomColor('pastel');
-        return {
+      const tasksWithColors = querySnapshot.docs
+        .map(doc => ({
           id: doc.id,
-          ...taskData
-        };
-      });
+          ...doc.data(),
+          color: doc.data().color || getRandomColor('pastel')
+        }))
+
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+  
       setAllTasks(tasksWithColors); // Update the tasks with colors
       updateDisplayedTasks(selectedDate);
     } catch (error) {
       console.error("Error fetching tasks: ", error);
     }
   };
+  
   
   useEffect(() => {
     fetchTasks();
@@ -115,8 +97,8 @@ useEffect(() => {
     setDisplayedTasks(sortedTasks);
   };
 
-  // Function to add a task
-  const addTask = async () => {
+// Function to add a task
+const addTask = async () => {
     const newTask = {
       userId: userUID,
       name: taskName,
@@ -124,21 +106,23 @@ useEffect(() => {
       completed: false,
       date: selectedDate.toISOString(),
     };
-
+  
     const tasksRef = collection(db, 'tasks');
     try {
       const docRef = await addDoc(tasksRef, newTask);
+      // Add the new task at the end of the array
       setAllTasks(prevTasks => [...prevTasks, { ...newTask, id: docRef.id }]);
       updateDisplayedTasks(selectedDate);
       fetchTasks();
     } catch (error) {
       console.error('Error adding task: ', error);
     }
-
+  
     setTaskName('');
     setTaskDescription('');
     setIsTaskModalVisible(false);
   };
+  
 
   // Function to handle sign-out
   const handleSignOut = async () => {
@@ -257,7 +241,7 @@ const handleUpdateTask = async () => {
                 style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
                 onPress={() => handleCheckboxToggle(taskId)}
             >
-                {isChecked && <Text style={styles.checkboxCheckmark}>✓</Text>}
+                {isChecked && <Text style={styles.checkboxCheckmark}>♡</Text>}
             </TouchableOpacity>
         );
     };
@@ -307,7 +291,9 @@ const handleUpdateTask = async () => {
           : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
         return (
         <G>
-      <Path d={pathData} fill={color} />
+      <Path d={pathData} fill={color} 
+        stroke="#FFFFFF" 
+        strokeWidth={2} />
        </G>
           );
         };
@@ -377,7 +363,7 @@ const handleUpdateTask = async () => {
             >
               <Polygon
                 points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                fill='white' // Use black for the pointer
+                fill='white' 
               />
             </Svg>
             <TouchableOpacity
@@ -427,7 +413,7 @@ const handleUpdateTask = async () => {
           const winningTask = tasksForWheel[winningIndex];
       
           // Delay setting the state until after the alert is closed
-          Alert.alert("Winner", `It is time to: ${winningTask.name}`, [
+          Alert.alert("", `${winningTask.name}`, [
             {
               text: "OK",
             },
@@ -506,7 +492,10 @@ const handleUpdateTask = async () => {
         </Modal>
               
         <View style={styles.taskList}>
-          {displayedTasks.map((task) => (
+        <FlatList
+            data={displayedTasks}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item: task }) => (
             <TouchableOpacity 
               key={task.id} 
             //   style={styles.taskCompleted}
@@ -529,9 +518,10 @@ const handleUpdateTask = async () => {
         {task.completed && <View style={styles.taskCompletedLine} />}
       </View>
               <TouchableOpacity onPress={() => showEditModal(task)}>
-    <Text>Edit</Text>
+    <Text style={{ fontSize: 24}}>✎</Text>
   </TouchableOpacity>
-  
+
+    
   <Modal
     visible={isEditModalVisible}
     transparent={true}
@@ -572,7 +562,8 @@ const handleUpdateTask = async () => {
   </Modal>
             </View>
             </TouchableOpacity> 
-          ))}
+          )}
+          />
         </View>
   
         <TouchableOpacity style={styles.addButton} onPress={toggleTaskModal}>

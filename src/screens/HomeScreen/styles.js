@@ -51,8 +51,8 @@ export default StyleSheet.create({
         height: 2, // Height of the line
         backgroundColor: 'red', // Color of the line
         width: '120%', // Line width - set to 100% of the container width
-        top: '50%', // Align to the vertical middle of the item
-        marginLeft: -30,
+        top: '30%', // Align to the vertical middle of the item
+        marginLeft: -34,
       },
       editText: {
         color: '#64b5f6',
@@ -194,22 +194,22 @@ export default StyleSheet.create({
     },
     
     checkboxBase: {
-      width: 25,
-      height: 25,
+      width: 30,
+      height: 30,
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: 4,
+      borderRadius: 1,
       borderWidth: 2,
       borderColor: 'grey',
       backgroundColor: 'transparent',
   },
   checkboxChecked: {
-      backgroundColor: 'lightblue', 
+      backgroundColor: 'white', 
   },
   checkboxCheckmark: {
       fontWeight: 'bold',
-      color: 'black',
-      fontSize: 20
+      color: 'red',
+      fontSize: 22
 
   },
   wheelContainer: {
@@ -219,14 +219,6 @@ export default StyleSheet.create({
     justifyContent: 'center', // Centers children vertically in the container
     alignItems: 'center', // Centers children horizontally in the container
   },
-  // wheelSection: {
-  //   // width: 200, // Same as wheelContainer width
-  //   // height: 100, // Half of wheelContainer height
-  //   // // borderTopRightRadius: 100, // Same as wheelContainer borderRadius
-  //   // // borderBottomRightRadius: 100, // Same as wheelContainer borderRadius
-  //   // justifyContent: 'center',
-  //   // alignItems: 'center',
-  // },
   spinButton: {
     position: 'absolute',
     width: 70, // Adjust size as needed
@@ -241,10 +233,21 @@ export default StyleSheet.create({
     marginLeft: -35, // Adjust for the size of the button to center
     borderWidth: 5, // Width of the border
     borderColor: 'white', // Color of the border
+    backgroundColor: '#FFD65C',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4, 
   },
   spinButtonText: {
     fontSize: 16,
     color: 'black', // Text color
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4, 
   },
 
   logo: {
@@ -253,4 +256,5 @@ export default StyleSheet.create({
     width: 255,
     alignSelf: "center",
 },
+
     })
