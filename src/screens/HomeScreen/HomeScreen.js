@@ -97,7 +97,22 @@ useEffect(() => {
       const taskDate = new Date(task.date);
       return taskDate.toDateString() === newDate.toDateString();
     });
-    setDisplayedTasks(filteredTasks);
+  
+    // Sort tasks so that completed tasks are at the bottom
+    const sortedTasks = filteredTasks.sort((a, b) => {
+      // If 'a' is not completed and 'b' is, 'a' should come first
+      if (!a.completed && b.completed) {
+        return -1;
+      }
+      // If 'a' is completed and 'b' is not, 'b' should come first
+      if (a.completed && !b.completed) {
+        return 1;
+      }
+      // If both have the same completed status, they stay in the same order
+      return 0;
+    });
+  
+    setDisplayedTasks(sortedTasks);
   };
 
   // Function to add a task
@@ -213,6 +228,8 @@ const handleUpdateTask = async () => {
     };
 
     const toggleTaskModal = () => {
+        setTaskName('');
+        setTaskDescription('');      
     setIsTaskModalVisible(!isTaskModalVisible);
     };
       
@@ -240,7 +257,7 @@ const handleUpdateTask = async () => {
                 style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
                 onPress={() => handleCheckboxToggle(taskId)}
             >
-                {isChecked && <Text style={styles.checkboxCheckmark}>✔</Text>}
+                {isChecked && <Text style={styles.checkboxCheckmark}>✓</Text>}
             </TouchableOpacity>
         );
     };
@@ -270,7 +287,7 @@ const handleUpdateTask = async () => {
         // Define saturation and lightness based on the theme
         if (theme === 'pastel') {
             saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
-            lightness = Math.random() * (100 - 80) + 80; // Lightness between 80% and 100%
+            lightness = Math.random() * (90 - 75) + 75; // Lightness between 80% and 100%
         } else {
             saturation = Math.random() * 100;
             lightness = 50;
@@ -354,13 +371,13 @@ const handleUpdateTask = async () => {
               width={pointerSize}
               style={{
                 position: 'absolute',
-                top: radius - 50,
+                top: radius - 47,
                 left: radius - (pointerSize / 2),
               }}
             >
               <Polygon
                 points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                fill='black' // Use black for the pointer
+                fill='white' // Use black for the pointer
               />
             </Svg>
             <TouchableOpacity
@@ -368,7 +385,7 @@ const handleUpdateTask = async () => {
               onPress={handleSpin}
               activeOpacity={1}
             >
-              <Text style={styles.spinButtonText}>Spin</Text>
+              <Text style={styles.spinButtonText}>SPIN</Text>
             </TouchableOpacity>
           </View>
         );
@@ -444,7 +461,7 @@ const handleUpdateTask = async () => {
             ) : (
                 <View style={styles.placeholderContainer}>
                 <Image
-                    source={require('../../../assets/icon1.png')}
+                    source={require('../../../assets/icon2.png')}
                     style={styles.logo}
                 />
                 </View>

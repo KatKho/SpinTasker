@@ -46,9 +46,6 @@ export default StyleSheet.create({
         fontSize: 16,
         marginLeft: 10
       },
-      taskCompleted: {
-        textDecorationLine: 'line-through',
-      },
       taskCompletedLine: {
         position: 'absolute',
         height: 2, // Height of the line
@@ -197,8 +194,8 @@ export default StyleSheet.create({
     },
     
     checkboxBase: {
-      width: 20,
-      height: 20,
+      width: 25,
+      height: 25,
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: 4,
@@ -211,7 +208,9 @@ export default StyleSheet.create({
   },
   checkboxCheckmark: {
       fontWeight: 'bold',
-      color: 'white',
+      color: 'black',
+      fontSize: 20
+
   },
   wheelContainer: {
     position: 'relative', // This is important for absolute children
@@ -230,27 +229,28 @@ export default StyleSheet.create({
   // },
   spinButton: {
     position: 'absolute',
-    width: 60, // Adjust size as needed
-    height: 60, // Adjust size as needed
+    width: 70, // Adjust size as needed
+    height: 70, // Adjust size as needed
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFDFBA', // Button color
-    borderRadius: 30, // Half of width/height
+    backgroundColor: '#FFD65C', // Button color
+    borderRadius: 35, // Half of width/height
     top: '50%', // Center vertically
     left: '50%', // Center horizontally
-    marginTop: -30, // Adjust for the size of the button to center
-    marginLeft: -30, // Adjust for the size of the button to center
-    
+    marginTop: -35, // Adjust for the size of the button to center
+    marginLeft: -35, // Adjust for the size of the button to center
+    borderWidth: 5, // Width of the border
+    borderColor: 'white', // Color of the border
   },
   spinButtonText: {
     fontSize: 16,
-    color: '#000', // Text color
+    color: 'black', // Text color
   },
 
   logo: {
     flex: 1,
-    height: 400,
-    width: 300,
+    height: 450,
+    width: 255,
     alignSelf: "center",
 },
     })
