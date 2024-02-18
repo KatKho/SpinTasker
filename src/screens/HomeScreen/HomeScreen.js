@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, FlatList } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, FlatList, TouchableHighlight } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -7,6 +7,7 @@ import styles from './styles';
 import { app } from '../../firebase/config'; 
 import Svg, { Path, G, Polygon, Text as SVGText } from 'react-native-svg';
 import { Animated } from 'react-native';
+import { SwipeListView } from 'react-native-swipe-list-view';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
@@ -430,6 +431,43 @@ const handleUpdateTask = async () => {
       }, [selectedTasks]);
     
 
+      // Render the front of the row
+const renderItem = (data, rowMap) => (
+    <TouchableHighlight
+      onPress={() => console.log('You touched me')}
+      style={styles.rowFront}
+      underlayColor={'#AAA'}
+    >
+      <View>
+        <Text>{data.item.name}</Text>
+      </View>
+    </TouchableHighlight>
+  );
+  
+  // Render the hidden back of the row
+  const renderHiddenItem = (data, rowMap) => (
+    <View style={styles.rowBack}>
+      <TouchableOpacity
+        style={[styles.backRightBtn, styles.backRightBtnLeft]}
+        onPress={() => toggleTaskCompletion(data.item.id)}
+      >
+        <Text style={styles.backTextWhite}>Complete</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.backRightBtn, styles.backRightBtnCenter]}
+        onPress={() => showEditModal(data.item)}
+      >
+        <Text style={styles.backTextWhite}>Edit</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.backRightBtn, styles.backRightBtnRight]}
+        onPress={() => deleteTask(data.item.id)}
+      >
+        <Text style={styles.backTextWhite}>Delete</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
       return (
 
         <View style={styles.container}>
@@ -491,7 +529,16 @@ const handleUpdateTask = async () => {
           </View>
         </Modal>
               
-        <View style={styles.taskList}>
+          <View style={styles.taskList}>
+    <SwipeListView
+      data={displayedTasks}
+      renderItem={renderItem}
+      renderHiddenItem={renderHiddenItem}
+      leftOpenValue={150}
+      rightOpenValue={-250} 
+      disableRightSwipe
+
+    />
         <FlatList
             data={displayedTasks}
             keyExtractor={(item) => item.id.toString()}
