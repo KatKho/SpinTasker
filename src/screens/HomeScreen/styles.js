@@ -33,18 +33,20 @@ export default StyleSheet.create({
         flex: 1,
         marginTop: 20,
       },
-      taskItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eceff1',
-      },
+      // taskItem: {
+      //   flexDirection: 'row',
+      //   alignItems: 'center',
+      //   justifyContent: 'space-between',
+      //   paddingVertical: 10,
+      //   paddingHorizontal: 15,
+      //   borderBottomWidth: 1,
+      //   borderBottomColor: '#eceff1',
+      // },
       taskText: {
         fontSize: 16,
-        marginLeft: 10
+        marginLeft: 10,
+        color: '#333333', 
+        fontWeight: '500', 
       },
       taskCompletedLine: {
         position: 'absolute',
@@ -124,14 +126,12 @@ export default StyleSheet.create({
           shadowRadius: 4,
           elevation: 5,
         },
-    
     modalTitle: {
       fontSize: 24,
       fontWeight: 'bold',
       marginBottom: 20,
       color: '#333', // Dark grey for text
     },
-    
     input: {
       height: 50, // Larger input for better touch area
       borderColor: '#ddd', // Light grey border
@@ -193,25 +193,25 @@ export default StyleSheet.create({
       textAlign: 'center',
     },
     
-    checkboxBase: {
-      width: 30,
-      height: 30,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 1,
-      borderWidth: 2,
-      borderColor: 'grey',
-      backgroundColor: 'transparent',
-  },
-  checkboxChecked: {
-      backgroundColor: 'white', 
-  },
-  checkboxCheckmark: {
-      fontWeight: 'bold',
-      color: 'red',
-      fontSize: 22
+  //   checkboxBase: {
+  //     width: 30,
+  //     height: 30,
+  //     justifyContent: 'center',
+  //     alignItems: 'center',
+  //     borderRadius: 1,
+  //     borderWidth: 2,
+  //     borderColor: 'grey',
+  //     backgroundColor: 'transparent',
+  // },
+  // checkboxChecked: {
+  //     backgroundColor: 'white', 
+  // },
+  // checkboxCheckmark: {
+  //     fontWeight: 'bold',
+  //     color: 'red',
+  //     fontSize: 22
 
-  },
+  // },
   wheelContainer: {
     position: 'relative', // This is important for absolute children
     height: 200, // Same as SVG height
@@ -221,35 +221,29 @@ export default StyleSheet.create({
   },
   spinButton: {
     position: 'absolute',
-    width: 70, // Adjust size as needed
-    height: 70, // Adjust size as needed
+    width: 70,
+    height: 70,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFD65C', // Button color
-    borderRadius: 35, // Half of width/height
-    top: '50%', // Center vertically
-    left: '50%', // Center horizontally
-    marginTop: -35, // Adjust for the size of the button to center
-    marginLeft: -35, // Adjust for the size of the button to center
-    borderWidth: 5, // Width of the border
-    borderColor: 'white', // Color of the border
-    backgroundColor: '#FFD65C',
-    shadowColor: '#000',
+    backgroundColor: '#FFA07A', // Light Salmon color
+    borderRadius: 35,
+    top: '50%',
+    left: '50%',
+    marginTop: -35,
+    marginLeft: -35,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    elevation: 8, // For Android shadow
+    shadowColor: '#000', // For iOS shadow
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 4, 
   },
   spinButtonText: {
-    fontSize: 16,
-    color: 'black', // Text color
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4, 
+    fontSize: 18,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
-
   logo: {
     flex: 1,
     height: 450,
@@ -258,19 +252,27 @@ export default StyleSheet.create({
 },
 rowFront: {
   alignItems: 'center',
-  backgroundColor: '#CCC',
-  borderBottomColor: 'black',
   borderBottomWidth: 1,
-  justifyContent: 'center',
-  height: 50,
+  borderBottomColor: '#eceff1',
+  backgroundColor: 'white',
+  justifyContent: 'flex-start', // Align items to the left rather than center
+  paddingLeft: 20, // Add padding to the left
+  height: 60, // Increase the height for more space
+  flexDirection: 'row', // Use flex-direction for internal alignment
+  shadowOpacity: 0.1, // Optional: Add shadow for depth (iOS only)
+  shadowRadius: 3,
+  shadowColor: 'black',
+  shadowOffset: { height: 1, width: 0 },
+  elevation: 3, // Optional: Add elevation for shadow on Android
 },
 rowBack: {
   alignItems: 'center',
   backgroundColor: '#DDD',
-  flex: 1,
+  // flex: 1,
   flexDirection: 'row',
-  justifyContent: 'space-between',
-  paddingLeft: 15,
+  justifyContent: 'flex-end',
+  height: 60,
+
 },
 backRightBtn: {
   alignItems: 'center',
@@ -279,18 +281,23 @@ backRightBtn: {
   position: 'absolute',
   top: 0,
   width: 75,
+  height: 60
 },
 backRightBtnLeft: {
-  backgroundColor: 'blue',
-  right: 75,
+  backgroundColor: 'green',
+  right: 225,
 },
 backRightBtnCenter: {
   backgroundColor: 'orange',
-  right: 150,
+  right: 75,
 },
 backRightBtnRight: {
   backgroundColor: 'red',
   right: 0,
+},
+backRightBtnRightLast: {
+  backgroundColor: 'blue',
+  right: 150,
 },
 backTextWhite: {
   color: '#FFF',

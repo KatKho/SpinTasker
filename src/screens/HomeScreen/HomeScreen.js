@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, FlatList, TouchableHighlight } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -226,7 +226,7 @@ const handleUpdateTask = async () => {
       };
       
     // Function to handle checkbox toggle
-    const handleCheckboxToggle = (taskId) => {
+    const handleSelectForWheel = (taskId) => {
         if (selectedTasks.includes(taskId)) {
             setSelectedTasks(selectedTasks.filter(id => id !== taskId));
         } else {
@@ -235,17 +235,17 @@ const handleUpdateTask = async () => {
     };
 
     // Custom Checkbox Component
-    const CustomCheckbox = ({ taskId }) => {
-        const isChecked = selectedTasks.includes(taskId);
-        return (
-            <TouchableOpacity
-                style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
-                onPress={() => handleCheckboxToggle(taskId)}
-            >
-                {isChecked && <Text style={styles.checkboxCheckmark}>♡</Text>}
-            </TouchableOpacity>
-        );
-    };
+    // const CustomCheckbox = ({ taskId }) => {
+    //     const isChecked = selectedTasks.includes(taskId);
+    //     return (
+    //         <TouchableOpacity
+    //             style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
+    //             onPress={() => handleCheckboxToggle(taskId)}
+    //         >
+    //             {isChecked && <Text style={styles.checkboxCheckmark}>♡</Text>}
+    //         </TouchableOpacity>
+    //     );
+    // };
 
     const usedHues = new Set();
 
@@ -434,12 +434,14 @@ const handleUpdateTask = async () => {
       // Render the front of the row
 const renderItem = (data, rowMap) => (
     <TouchableHighlight
-      onPress={() => console.log('You touched me')}
-      style={styles.rowFront}
-      underlayColor={'#AAA'}
+    //   onPress={() => console.log('You touched me')}
+      style={[styles.rowFront, { 
+        backgroundColor: selectedTasks.includes(data.item.id) ? data.item.color : 'white'
+      }]}
+    //   underlayColor={'#AAA'}
     >
       <View>
-        <Text>{data.item.name}</Text>
+        <Text style={styles.taskText}>{data.item.name}</Text>
       </View>
     </TouchableHighlight>
   );
@@ -465,6 +467,12 @@ const renderItem = (data, rowMap) => (
       >
         <Text style={styles.backTextWhite}>Delete</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+      style={[styles.backRightBtn, styles.backRightBtnRightLast]}
+      onPress={() => handleSelectForWheel(data.item.id)}
+    >
+      <Text style={styles.backTextWhite}>Select</Text>
+    </TouchableOpacity>
     </View>
   );
 
@@ -529,17 +537,16 @@ const renderItem = (data, rowMap) => (
           </View>
         </Modal>
               
-          <View style={styles.taskList}>
+    <View style={styles.taskList}>
     <SwipeListView
-      data={displayedTasks}
-      renderItem={renderItem}
-      renderHiddenItem={renderHiddenItem}
-      leftOpenValue={150}
-      rightOpenValue={-250} 
-      disableRightSwipe
-
-    />
-        <FlatList
+        data={displayedTasks}
+        renderItem={renderItem}
+        renderHiddenItem={renderHiddenItem}
+        // leftOpenValue={150} 
+        rightOpenValue={-300} 
+        disableRightSwipe={true}
+        />
+        {/* <FlatList
             data={displayedTasks}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item: task }) => (
@@ -565,7 +572,7 @@ const renderItem = (data, rowMap) => (
       </View>
               <TouchableOpacity onPress={() => showEditModal(task)}>
     <Text style={{ fontSize: 25}}>✐</Text>
-  </TouchableOpacity>
+  </TouchableOpacity> */}
 
     
   <Modal
@@ -584,7 +591,7 @@ const renderItem = (data, rowMap) => (
         />
         <TextInput
           style={styles.input}
-          placeholder="Description (optional)"
+          placeholder="Description"
           multiline
           value={taskDescription}
           onChangeText={setTaskDescription}
@@ -606,11 +613,11 @@ const renderItem = (data, rowMap) => (
       </View>
     </View>
   </Modal>
-            </View>
+            {/* </View>
             </TouchableOpacity> 
           )}
-          />
-        </View>
+          /> */}
+        </View> 
   
         <TouchableOpacity style={styles.addButton} onPress={toggleTaskModal}>
         <Text style={styles.addButtonText} >+</Text>
@@ -627,12 +634,14 @@ const renderItem = (data, rowMap) => (
         <TextInput
           style={styles.input}
           placeholder="Name"
+          placeholderTextColor="#ddd"
           value={taskName}
           onChangeText={setTaskName}
         />
         <TextInput
           style={styles.input}
-          placeholder="Description (optional)"
+          placeholder="Description"
+          placeholderTextColor="#ddd"
           multiline
           value={taskDescription}
           onChangeText={setTaskDescription}
