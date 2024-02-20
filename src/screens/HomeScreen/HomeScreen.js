@@ -443,11 +443,11 @@ const renderItem = (data, rowMap) => (
        <View style={styles.rowFrontContainer}>
         {data.item.completed ? (
         <Image
-        source={require('../../../assets/yes.png')}
+        source={require('../../../assets/yes1.png')}
         style={styles.taskLogo}
     />
       ) :<Image
-      source={require('../../../assets/no.png')}
+      source={require('../../../assets/no1.png')}
       style={styles.taskLogo}
   />}
         <Text style={styles.taskText}>{data.item.name}</Text>
@@ -462,24 +462,41 @@ const renderItem = (data, rowMap) => (
         style={[styles.backRightBtn, styles.backRightBtnLeft]}
         onPress={() => toggleTaskCompletion(data.item.id)}
       >
+        <Image
+      source={require('../../../assets/yes1.png')}
+      style={styles.taskLogo}
+  />
         <Text style={styles.backTextWhite}>Complete</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnCenter]}
         onPress={() => showEditModal(data.item)}
       >
+
+        <Image
+            source={require('../../../assets/edit.png')}
+            style={styles.taskLogo}
+        />
         <Text style={styles.backTextWhite}>Edit</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnRight]}
         onPress={() => deleteTask(data.item.id)}
       >
+                <Image
+      source={require('../../../assets/trash.png')}
+      style={styles.taskLogo}
+  />
         <Text style={styles.backTextWhite}>Delete</Text>
       </TouchableOpacity>
       <TouchableOpacity
       style={[styles.backRightBtn, styles.backRightBtnRightLast]}
       onPress={() => handleSelectForWheel(data.item.id)}
     >
+                <Image
+      source={require('../../../assets/wheel.png')}
+      style={styles.taskLogo}
+  />
       <Text style={styles.backTextWhite}>Select</Text>
     </TouchableOpacity>
     </View>
@@ -512,15 +529,21 @@ const renderItem = (data, rowMap) => (
 
       
         <TouchableOpacity onPress={showDatePickerModal} style={styles.dateDisplay}>
-          <Text style={styles.dateText}>
+        <View style={styles.dateTextContainer}>
+            <Image
+            source={require('../../../assets/calendar.png')}
+            style={styles.calendarIcon}
+            />
+            <Text style={styles.dateText}>
             {selectedDate.toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
             })}
-          </Text>
+            </Text>
+        </View>
         </TouchableOpacity>
-  
+        
         <Modal
           visible={showDatePicker}
           transparent={true}
@@ -630,7 +653,7 @@ const renderItem = (data, rowMap) => (
   
         <TouchableOpacity onPress={toggleTaskModal}>
         <Image 
-      source={require('../../../assets/add.png')}
+      source={require('../../../assets/add1.png')}
       style={styles.addButton}
   />
         </TouchableOpacity>

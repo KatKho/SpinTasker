@@ -78,6 +78,17 @@ export default StyleSheet.create({
       dateText: {
         alignSelf: 'center',
         alignItems: 'center',
+        fontSize: 16
+      },
+      dateTextContainer: {
+        flexDirection: 'row',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+      },
+      calendarIcon: {
+        width: 25, 
+        height: 25, 
+        marginRight: 10, 
       },
       centeredView: {
           flex: 1,
