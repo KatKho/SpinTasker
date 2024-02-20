@@ -60,19 +60,21 @@ export default StyleSheet.create({
         color: '#64b5f6',
       },
       addButton: {
-        backgroundColor: '#64b5f6',
-        borderRadius: 30,
-        paddingVertical: 10,
-        paddingHorizontal: 18,
+        // backgroundColor: '#64b5f6',
+        // borderRadius: 30,
+        // paddingVertical: 10,
+        // paddingHorizontal: 18,
         alignSelf: 'center',
         marginTop: 5,
         marginBottom: 30,
+        width: 70,
+        height: 65
       },
-      addButtonText: {
-        color: '#fff',
-        fontSize: 30,
-        fontWeight: 'bold',
-      },
+      // addButtonText: {
+      //   color: '#fff',
+      //   fontSize: 30,
+      //   fontWeight: 'bold',
+      // },
       dateText: {
         alignSelf: 'center',
         alignItems: 'center',
@@ -302,5 +304,18 @@ backRightBtnRightLast: {
 backTextWhite: {
   color: '#FFF',
 },
+taskLogo: {
+width: 25,
+height: 25,
+},
+rowFrontContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingLeft: 20,
+  paddingRight: 20, // Add padding to the right for space around the icon
+  height: 60,
+},
+
 
     })

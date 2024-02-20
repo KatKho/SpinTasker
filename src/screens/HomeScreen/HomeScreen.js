@@ -440,7 +440,16 @@ const renderItem = (data, rowMap) => (
       }]}
     //   underlayColor={'#AAA'}
     >
-      <View>
+       <View style={styles.rowFrontContainer}>
+        {data.item.completed ? (
+        <Image
+        source={require('../../../assets/yes.png')}
+        style={styles.taskLogo}
+    />
+      ) :<Image
+      source={require('../../../assets/no.png')}
+      style={styles.taskLogo}
+  />}
         <Text style={styles.taskText}>{data.item.name}</Text>
       </View>
     </TouchableHighlight>
@@ -619,8 +628,11 @@ const renderItem = (data, rowMap) => (
           /> */}
         </View> 
   
-        <TouchableOpacity style={styles.addButton} onPress={toggleTaskModal}>
-        <Text style={styles.addButtonText} >+</Text>
+        <TouchableOpacity onPress={toggleTaskModal}>
+        <Image 
+      source={require('../../../assets/add.png')}
+      style={styles.addButton}
+  />
         </TouchableOpacity>
   
         <Modal
