@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, FlatList } from 'react-native';
+import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -7,6 +7,7 @@ import styles from './styles';
 import { app } from '../../firebase/config'; 
 import Svg, { Path, G, Polygon, Text as SVGText } from 'react-native-svg';
 import { Animated } from 'react-native';
+import { SwipeListView } from 'react-native-swipe-list-view';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
@@ -225,7 +226,7 @@ const handleUpdateTask = async () => {
       };
       
     // Function to handle checkbox toggle
-    const handleCheckboxToggle = (taskId) => {
+    const handleSelectForWheel = (taskId) => {
         if (selectedTasks.includes(taskId)) {
             setSelectedTasks(selectedTasks.filter(id => id !== taskId));
         } else {
@@ -234,17 +235,17 @@ const handleUpdateTask = async () => {
     };
 
     // Custom Checkbox Component
-    const CustomCheckbox = ({ taskId }) => {
-        const isChecked = selectedTasks.includes(taskId);
-        return (
-            <TouchableOpacity
-                style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
-                onPress={() => handleCheckboxToggle(taskId)}
-            >
-                {isChecked && <Text style={styles.checkboxCheckmark}>♡</Text>}
-            </TouchableOpacity>
-        );
-    };
+    // const CustomCheckbox = ({ taskId }) => {
+    //     const isChecked = selectedTasks.includes(taskId);
+    //     return (
+    //         <TouchableOpacity
+    //             style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
+    //             onPress={() => handleCheckboxToggle(taskId)}
+    //         >
+    //             {isChecked && <Text style={styles.checkboxCheckmark}>♡</Text>}
+    //         </TouchableOpacity>
+    //     );
+    // };
 
     const usedHues = new Set();
 
@@ -430,6 +431,60 @@ const handleUpdateTask = async () => {
       }, [selectedTasks]);
     
 
+      // Render the front of the row
+const renderItem = (data, rowMap) => (
+    <TouchableHighlight
+    //   onPress={() => console.log('You touched me')}
+      style={[styles.rowFront, { 
+        backgroundColor: selectedTasks.includes(data.item.id) ? data.item.color : 'white'
+      }]}
+    //   underlayColor={'#AAA'}
+    >
+       <View style={styles.rowFrontContainer}>
+        {data.item.completed ? (
+        <Image
+        source={require('../../../assets/yes.png')}
+        style={styles.taskLogo}
+    />
+      ) :<Image
+      source={require('../../../assets/no.png')}
+      style={styles.taskLogo}
+  />}
+        <Text style={styles.taskText}>{data.item.name}</Text>
+      </View>
+    </TouchableHighlight>
+  );
+  
+  // Render the hidden back of the row
+  const renderHiddenItem = (data, rowMap) => (
+    <View style={styles.rowBack}>
+      <TouchableOpacity
+        style={[styles.backRightBtn, styles.backRightBtnLeft]}
+        onPress={() => toggleTaskCompletion(data.item.id)}
+      >
+        <Text style={styles.backTextWhite}>Complete</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.backRightBtn, styles.backRightBtnCenter]}
+        onPress={() => showEditModal(data.item)}
+      >
+        <Text style={styles.backTextWhite}>Edit</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.backRightBtn, styles.backRightBtnRight]}
+        onPress={() => deleteTask(data.item.id)}
+      >
+        <Text style={styles.backTextWhite}>Delete</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+      style={[styles.backRightBtn, styles.backRightBtnRightLast]}
+      onPress={() => handleSelectForWheel(data.item.id)}
+    >
+      <Text style={styles.backTextWhite}>Select</Text>
+    </TouchableOpacity>
+    </View>
+  );
+
       return (
 
         <View style={styles.container}>
@@ -491,8 +546,16 @@ const handleUpdateTask = async () => {
           </View>
         </Modal>
               
-        <View style={styles.taskList}>
-        <FlatList
+    <View style={styles.taskList}>
+    <SwipeListView
+        data={displayedTasks}
+        renderItem={renderItem}
+        renderHiddenItem={renderHiddenItem}
+        // leftOpenValue={150} 
+        rightOpenValue={-300} 
+        disableRightSwipe={true}
+        />
+        {/* <FlatList
             data={displayedTasks}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item: task }) => (
@@ -518,7 +581,7 @@ const handleUpdateTask = async () => {
       </View>
               <TouchableOpacity onPress={() => showEditModal(task)}>
     <Text style={{ fontSize: 25}}>✐</Text>
-  </TouchableOpacity>
+  </TouchableOpacity> */}
 
     
   <Modal
@@ -537,7 +600,7 @@ const handleUpdateTask = async () => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Description (optional)"
+          placeholder="Description"
           multiline
           value={taskDescription}
           onChangeText={setTaskDescription}
@@ -559,14 +622,17 @@ const handleUpdateTask = async () => {
       </View>
     </View>
   </Modal>
-            </View>
+            {/* </View>
             </TouchableOpacity> 
           )}
-          />
-        </View>
+          /> */}
+        </View> 
   
-        <TouchableOpacity style={styles.addButton} onPress={toggleTaskModal}>
-        <Text style={styles.addButtonText} >+</Text>
+        <TouchableOpacity onPress={toggleTaskModal}>
+        <Image 
+      source={require('../../../assets/add.png')}
+      style={styles.addButton}
+  />
         </TouchableOpacity>
   
         <Modal
@@ -580,12 +646,14 @@ const handleUpdateTask = async () => {
         <TextInput
           style={styles.input}
           placeholder="Name"
+          placeholderTextColor="#ddd"
           value={taskName}
           onChangeText={setTaskName}
         />
         <TextInput
           style={styles.input}
-          placeholder="Description (optional)"
+          placeholder="Description"
+          placeholderTextColor="#ddd"
           multiline
           value={taskDescription}
           onChangeText={setTaskDescription}
