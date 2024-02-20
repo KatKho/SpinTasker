@@ -18,15 +18,16 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height: 210, // Arbitrary size, you can adjust as needed
-        width: 220, // This should be a square
-        borderRadius: 100, // Half of the size to make it a circle
+        width: 210, // This should be a square
+        // borderRadius: 100, // Half of the size to make it a circle
         // borderWidth: 5,
         // borderColor: '#64b5f6',
         // backgroundColor: 'lightblue'
       },
       placeholderContainer: {
-        height: 210, 
-        width: 190,
+        marginTop: 6.5,
+        height: 220, 
+        width: 220,
       },
       // wheelText: {
       //   fontSize: 18,

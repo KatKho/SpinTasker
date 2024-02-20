@@ -304,10 +304,13 @@ const handleUpdateTask = async () => {
     // };
 
       const PieSlice = ({ color, angle, index, tasksLength, task }) => {
+        const strokeWidth = 2; // Your stroke width
         const radius = 100;
+        const adjustedRadius = radius - strokeWidth / 2; // Adjust the radius        
         const pathData = tasksLength === 1
-          ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
-          : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
+        ? `M ${radius}, ${radius} m -${adjustedRadius}, 0 a ${adjustedRadius},${adjustedRadius} 0 1,0 ${adjustedRadius * 2},0 a ${adjustedRadius},${adjustedRadius} 0 1,0 -${adjustedRadius * 2},0`
+        : describeArc(radius, radius, adjustedRadius, index * angle, (index + 1) * angle);
+      
         return (
         <G>
       <Path d={pathData} fill={color} 
@@ -531,10 +534,10 @@ const renderItem = (data, rowMap) => (
             tasksForWheel.length > 0 ? (
                 <Wheel tasks={tasksForWheel} />
             ) : (
-                <View style={styles.placeholderContainer}>
+                <View >
                 <Image
                     source={require('../../../assets/wheelview.png')}
-                    style={styles.logo}
+                    style={styles.placeholderContainer}
                 />
                 </View>
             )
