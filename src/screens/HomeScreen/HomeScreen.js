@@ -5,7 +5,7 @@ import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
 import { app } from '../../firebase/config'; 
-import Svg, { Path, G, Polygon, Text as SVGText } from 'react-native-svg';
+import Svg, { Path, G, Polygon, Text as SVGText} from 'react-native-svg';
 import { Animated } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 
@@ -32,30 +32,27 @@ export default function HomeScreen({ navigation, route }) {
   const [winningTaskId, setWinningTaskId] = useState(null);
   const [winningColor, setWinningColor] = useState('black');
   const [isFirstSpin, setIsFirstSpin] = useState(true);
+  const [selectedTaskColors, setSelectedTaskColors] = useState({});
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
+  const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF'];
 
 // Function to fetch tasks from Firestore
 const fetchTasks = async () => {
     try {
-      const q = query(collection(db, "tasks"), where("userId", "==", userUID));
-      const querySnapshot = await getDocs(q);
-      const tasksWithColors = querySnapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          color: doc.data().color || getRandomColor('pastel')
-        }))
-
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-  
-      setAllTasks(tasksWithColors); // Update the tasks with colors
-      updateDisplayedTasks(selectedDate);
+        const q = query(collection(db, "tasks"), where("userId", "==", userUID));
+        const querySnapshot = await getDocs(q);
+        const tasks = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        })).sort((a, b) => new Date(a.date) - new Date(b.date));
+        setAllTasks(tasks); 
+        updateDisplayedTasks(selectedDate);
     } catch (error) {
-      console.error("Error fetching tasks: ", error);
+        console.error("Error fetching tasks: ", error);
     }
-  };
-  
+};
+
   
   useEffect(() => {
     fetchTasks();
@@ -225,14 +222,35 @@ const handleUpdateTask = async () => {
         setIsEditModalVisible(true);
       };
       
-    // Function to handle checkbox toggle
-    const handleSelectForWheel = (taskId) => {
-        if (selectedTasks.includes(taskId)) {
-            setSelectedTasks(selectedTasks.filter(id => id !== taskId));
-        } else {
-            setSelectedTasks([...selectedTasks, taskId]);
-        }
-    };
+
+  // Function to handle selection for the wheel, with color assignment
+  const handleSelectForWheel = (taskId) => {
+    let newSelectedTasks = [...selectedTasks];
+    let taskIndexInSelected = selectedTasks.findIndex(id => id === taskId);
+  
+    // Task is being selected
+    if (taskIndexInSelected === -1) {
+      newSelectedTasks.push(taskId);
+      // Assign color to the newly selected task
+      let nextColorIndex = (newSelectedTasks.length - 1) % colors.length;
+      setSelectedTaskColors(prevColors => ({
+        ...prevColors,
+        [taskId]: colors[nextColorIndex]
+      }));
+    }
+    // Task is being deselected
+    else {
+      newSelectedTasks.splice(taskIndexInSelected, 1);
+      // Remove the task color from the selectedTaskColors state
+      setSelectedTaskColors(prevColors => {
+        const newColors = {...prevColors};
+        delete newColors[taskId];
+        return newColors;
+      });
+    }
+  
+    setSelectedTasks(newSelectedTasks);
+};
 
     // Custom Checkbox Component
     // const CustomCheckbox = ({ taskId }) => {
@@ -247,49 +265,52 @@ const handleUpdateTask = async () => {
     //     );
     // };
 
-    const usedHues = new Set();
+    // const usedHues = new Set();
 
-    const getRandomColor = (theme) => {
-        let hue;
-        let saturation;
-        let lightness;
+    // const getRandomColor = (theme) => {
+    //     let hue;
+    //     let saturation;
+    //     let lightness;
         
-        // Attempt to find a unique hue that hasn't been used
-        do {
-            switch(theme) {
+    //     // Attempt to find a unique hue that hasn't been used
+    //     do {
+    //         switch(theme) {
 
-                case 'pastel':
-                    // Pastel colors: high lightness and saturation
-                    hue = Math.random() * 360; // Full range of hues
-                    break;
-                default:
-                    // Default to full range of hues
-                    hue = Math.random() * 360;
-            }
-        } while (usedHues.has(Math.floor(hue))); // Continue if the hue has been used
-        usedHues.add(Math.floor(hue)); // Add the hue to the set of used hues
+    //             case 'pastel':
+    //                 // Pastel colors: high lightness and saturation
+    //                 hue = Math.random() * 360; // Full range of hues
+    //                 break;
+    //             default:
+    //                 // Default to full range of hues
+    //                 hue = Math.random() * 360;
+    //         }
+    //     } while (usedHues.has(Math.floor(hue))); // Continue if the hue has been used
+    //     usedHues.add(Math.floor(hue)); // Add the hue to the set of used hues
     
-        // Define saturation and lightness based on the theme
-        if (theme === 'pastel') {
-            saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
-            lightness = Math.random() * (90 - 75) + 75; // Lightness between 80% and 100%
-        } else {
-            saturation = Math.random() * 100;
-            lightness = 50;
-        }
+    //     // Define saturation and lightness based on the theme
+    //     if (theme === 'pastel') {
+    //         saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
+    //         lightness = Math.random() * (90 - 75) + 75; // Lightness between 80% and 100%
+    //     } else {
+    //         saturation = Math.random() * 100;
+    //         lightness = 50;
+    //     }
     
-        return `hsl(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(lightness)}%)`;
-    };
+    //     return `hsl(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(lightness)}%)`;
+    // };
 
-    const resetUsedHues = () => {
-        usedHues.clear();
-    };
+    // const resetUsedHues = () => {
+    //     usedHues.clear();
+    // };
 
       const PieSlice = ({ color, angle, index, tasksLength, task }) => {
+        const strokeWidth = 2; // Your stroke width
         const radius = 100;
+        const adjustedRadius = radius - strokeWidth / 2; // Adjust the radius        
         const pathData = tasksLength === 1
-          ? `M ${radius}, ${radius} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius * 2},0 a ${radius},${radius} 0 1,0 -${radius * 2},0`
-          : describeArc(radius, radius, radius, index * angle, (index + 1) * angle);
+        ? `M ${radius}, ${radius} m -${adjustedRadius}, 0 a ${adjustedRadius},${adjustedRadius} 0 1,0 ${adjustedRadius * 2},0 a ${adjustedRadius},${adjustedRadius} 0 1,0 -${adjustedRadius * 2},0`
+        : describeArc(radius, radius, adjustedRadius, index * angle, (index + 1) * angle);
+      
         return (
         <G>
       <Path d={pathData} fill={color} 
@@ -342,31 +363,27 @@ const handleUpdateTask = async () => {
                 <G transform={`translate(0, 0)`}>
                   {tasks.map((task, index) => (
                     <PieSlice
-                      key={task.id}
-                      task={task}
-                      color={task.color}
-                      angle={angle}
-                      index={index}
-                      tasksLength={tasks.length}
-                    />
+                    key={task.id}
+                    task={task}
+                    color={selectedTaskColors[task.id]} 
+                    angle={angle}
+                    index={index}
+                    tasksLength={tasks.length}
+                  />
                   ))}
                 </G>
               </Svg>
             </Animated.View>
             <Svg
-              height={pointerSize}
-              width={pointerSize}
-              style={{
-                position: 'absolute',
-                top: radius - 47,
-                left: radius - (pointerSize / 2),
-              }}
-            >
-              <Polygon
-                points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                fill='white' 
-              />
-            </Svg>
+                height={pointerSize}
+                width={pointerSize}
+                style={styles.pointer} // Apply the style here
+                >
+                <Polygon
+                    points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
+                    fill='white' 
+                />
+                </Svg>
             <TouchableOpacity
               style={styles.spinButton}
               onPress={handleSpin}
@@ -435,19 +452,19 @@ const handleUpdateTask = async () => {
 const renderItem = (data, rowMap) => (
     <TouchableHighlight
     //   onPress={() => console.log('You touched me')}
-      style={[styles.rowFront, { 
-        backgroundColor: selectedTasks.includes(data.item.id) ? data.item.color : 'white'
-      }]}
+    style={[styles.rowFront, { 
+        backgroundColor: selectedTasks.includes(data.item.id) ? selectedTaskColors[data.item.id] || 'white' : 'white'
+    }]}
     //   underlayColor={'#AAA'}
     >
        <View style={styles.rowFrontContainer}>
         {data.item.completed ? (
         <Image
-        source={require('../../../assets/yes.png')}
+        source={require('../../../assets/yes1.png')}
         style={styles.taskLogo}
     />
       ) :<Image
-      source={require('../../../assets/no.png')}
+      source={require('../../../assets/no1.png')}
       style={styles.taskLogo}
   />}
         <Text style={styles.taskText}>{data.item.name}</Text>
@@ -462,24 +479,41 @@ const renderItem = (data, rowMap) => (
         style={[styles.backRightBtn, styles.backRightBtnLeft]}
         onPress={() => toggleTaskCompletion(data.item.id)}
       >
+        <Image
+      source={require('../../../assets/yes1.png')}
+      style={styles.taskLogo}
+  />
         <Text style={styles.backTextWhite}>Complete</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnCenter]}
         onPress={() => showEditModal(data.item)}
       >
+
+        <Image
+            source={require('../../../assets/edit.png')}
+            style={styles.taskLogo}
+        />
         <Text style={styles.backTextWhite}>Edit</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnRight]}
         onPress={() => deleteTask(data.item.id)}
       >
+                <Image
+      source={require('../../../assets/trash.png')}
+      style={styles.taskLogo}
+  />
         <Text style={styles.backTextWhite}>Delete</Text>
       </TouchableOpacity>
       <TouchableOpacity
       style={[styles.backRightBtn, styles.backRightBtnRightLast]}
       onPress={() => handleSelectForWheel(data.item.id)}
     >
+                <Image
+      source={require('../../../assets/wheel.png')}
+      style={styles.taskLogo}
+  />
       <Text style={styles.backTextWhite}>Select</Text>
     </TouchableOpacity>
     </View>
@@ -500,10 +534,10 @@ const renderItem = (data, rowMap) => (
             tasksForWheel.length > 0 ? (
                 <Wheel tasks={tasksForWheel} />
             ) : (
-                <View style={styles.placeholderContainer}>
+                <View >
                 <Image
-                    source={require('../../../assets/icon2.png')}
-                    style={styles.logo}
+                    source={require('../../../assets/wheelview.png')}
+                    style={styles.placeholderContainer}
                 />
                 </View>
             )
@@ -512,15 +546,21 @@ const renderItem = (data, rowMap) => (
 
       
         <TouchableOpacity onPress={showDatePickerModal} style={styles.dateDisplay}>
-          <Text style={styles.dateText}>
+        <View style={styles.dateTextContainer}>
+            <Image
+            source={require('../../../assets/calendar.png')}
+            style={styles.calendarIcon}
+            />
+            <Text style={styles.dateText}>
             {selectedDate.toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
             })}
-          </Text>
+            </Text>
+        </View>
         </TouchableOpacity>
-  
+        
         <Modal
           visible={showDatePicker}
           transparent={true}
@@ -628,11 +668,15 @@ const renderItem = (data, rowMap) => (
           /> */}
         </View> 
   
-        <TouchableOpacity onPress={toggleTaskModal}>
-        <Image 
-      source={require('../../../assets/add.png')}
+        <TouchableOpacity 
+        /* <Image 
+      source={require('../../../assets/add2.png')}
       style={styles.addButton}
-  />
+  /> */
+      style={styles.addButton}
+      onPress={toggleTaskModal}
+    >
+      <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
   
         <Modal

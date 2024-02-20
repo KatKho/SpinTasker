@@ -17,12 +17,17 @@ export default StyleSheet.create({
         alignSelf: 'center',
         alignItems: 'center',
         justifyContent: 'center',
-        height: 200, // Arbitrary size, you can adjust as needed
-        width: 200, // This should be a square
-        borderRadius: 100, // Half of the size to make it a circle
+        height: 210, // Arbitrary size, you can adjust as needed
+        width: 210, // This should be a square
+        // borderRadius: 100, // Half of the size to make it a circle
         // borderWidth: 5,
         // borderColor: '#64b5f6',
         // backgroundColor: 'lightblue'
+      },
+      placeholderContainer: {
+        marginTop: 6.5,
+        height: 220, 
+        width: 220,
       },
       // wheelText: {
       //   fontSize: 18,
@@ -67,17 +72,38 @@ export default StyleSheet.create({
         alignSelf: 'center',
         marginTop: 5,
         marginBottom: 30,
-        width: 70,
-        height: 65
+        width: 65,
+        height: 65,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#FF7F50', // You can adjust the color to match your theme
+        borderRadius: 40, // Half of the width/height to make it circular
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
+        shadowColor: '#000', // For iOS shadow
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
       },
-      // addButtonText: {
-      //   color: '#fff',
-      //   fontSize: 30,
-      //   fontWeight: 'bold',
-      // },
+      addButtonText: {
+        color: '#fff',
+        fontSize: 30,
+        fontWeight: 'bold',
+      },
       dateText: {
         alignSelf: 'center',
         alignItems: 'center',
+        fontSize: 16
+      },
+      dateTextContainer: {
+        flexDirection: 'row',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+      },
+      calendarIcon: {
+        width: 25, 
+        height: 25, 
+        marginRight: 10, 
       },
       centeredView: {
           flex: 1,
@@ -215,24 +241,33 @@ export default StyleSheet.create({
 
   // },
   wheelContainer: {
-    position: 'relative', // This is important for absolute children
-    height: 200, // Same as SVG height
-    width: 200, // Same as SVG width
-    justifyContent: 'center', // Centers children vertically in the container
-    alignItems: 'center', // Centers children horizontally in the container
+    position: 'relative',
+    height: 200,
+    width: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff', // Background color for the wheel container
+    borderRadius: 100, // Half the size to make it a perfect circle
+    borderWidth: 10, // Thickness of the border
+    borderColor: '#FFA07A', // Color of the border to match the spin button
+    elevation: 10, // This adds a shadow on Android
+    shadowColor: '#000', // Shadow color for iOS
+    shadowOffset: { width: 0, height: 5 }, // Shadow position for iOS
+    shadowOpacity: 0.3, // Shadow opacity for iOS
+    shadowRadius: 8, // Shadow blur radius for iOS
   },
   spinButton: {
     position: 'absolute',
-    width: 70,
-    height: 70,
+    width: 80, // Width of the spin button
+    height: 80, // Height of the spin button
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFA07A', // Light Salmon color
-    borderRadius: 35,
+    backgroundColor: '#FF7F50', // You can adjust the color to match your theme
+    borderRadius: 40, // Half of the width/height to make it circular
     top: '50%',
     left: '50%',
-    marginTop: -35,
-    marginLeft: -35,
+    marginTop: -40, // Half of the height to ensure it's centered
+    marginLeft: -40, // Half of the width to ensure it's centered
     borderWidth: 2,
     borderColor: '#FFFFFF',
     elevation: 8, // For Android shadow
@@ -315,6 +350,20 @@ rowFrontContainer: {
   paddingLeft: 20,
   paddingRight: 20, // Add padding to the right for space around the icon
   height: 60,
+},
+pointer: {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  marginTop: -55,
+  marginLeft: -15,
+  width: 100,
+  height: 100,
+  color: 'white',
+  shadowOpacity: 0.1, 
+  shadowRadius: 3,
+  shadowColor: 'black',
+  shadowOffset: { height: 1, width: 0 },
 },
 
 
