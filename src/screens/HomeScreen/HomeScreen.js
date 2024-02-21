@@ -434,7 +434,7 @@ const handleUpdateTask = async () => {
           const winningTask = tasksForWheel[winningIndex];
       
           // Delay setting the state until after the alert is closed
-          Alert.alert("", `${winningTask.name}`, [
+          Alert.alert(`${winningTask.name}`, "", [
             {
               text: "OK",
             },
@@ -661,13 +661,7 @@ const renderItem = (data, rowMap) => (
             style={styles.saveButton}
             onPress={handleUpdateTask}
           >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDeleteTask}
-          >
-            <Text style={styles.deleteButtonText}>Delete</Text>
+            <Text style={styles.saveButtonText}>Ok</Text>
           </TouchableOpacity>
         </View>
       </View>
