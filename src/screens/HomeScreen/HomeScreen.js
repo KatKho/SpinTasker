@@ -140,7 +140,7 @@ const addTask = async () => {
   };
 
 // Toggle task completion
-const toggleTaskCompletion = async (taskId) => {
+const toggleTaskCompletion = async (taskId, rowMap, rowKey) => {
     const task = allTasks.find(t => t.id === taskId);
     if (task) {
       const taskRef = doc(db, "tasks", taskId);
@@ -149,6 +149,7 @@ const toggleTaskCompletion = async (taskId) => {
           completed: !task.completed
         });
         await fetchTasks(); 
+        closeRow(rowMap, rowKey);
       } catch (error) {
         console.error('Error toggling task completion: ', error);
       }
@@ -215,16 +216,17 @@ const handleUpdateTask = async () => {
     setIsTaskModalVisible(!isTaskModalVisible);
     };
       
-      const showEditModal = (task) => {
+      const showEditModal = (task, rowMap, rowKey) => {
         setCurrentTask(task);
         setTaskName(task.name);
         setTaskDescription(task.description);
         setIsEditModalVisible(true);
+        closeRow(rowMap, rowKey);
       };
       
 
   // Function to handle selection for the wheel, with color assignment
-  const handleSelectForWheel = (taskId) => {
+  const handleSelectForWheel = (taskId, rowMap, rowKey) => {
     let newSelectedTasks = [...selectedTasks];
     let taskIndexInSelected = selectedTasks.findIndex(id => id === taskId);
   
@@ -250,6 +252,7 @@ const handleUpdateTask = async () => {
     }
   
     setSelectedTasks(newSelectedTasks);
+    closeRow(rowMap, rowKey);
 };
 
     // Custom Checkbox Component
@@ -431,7 +434,7 @@ const handleUpdateTask = async () => {
           const winningTask = tasksForWheel[winningIndex];
       
           // Delay setting the state until after the alert is closed
-          Alert.alert("", `${winningTask.name}`, [
+          Alert.alert(`${winningTask.name}`, "", [
             {
               text: "OK",
             },
@@ -447,7 +450,14 @@ const handleUpdateTask = async () => {
         }
       }, [selectedTasks]);
     
-
+// Helper function to close a row
+const closeRow = (rowMap, rowKey) => {
+    console.log(`Trying to close row: ${rowKey}`);
+    if (rowMap[rowKey]) {
+      console.log(`Closing row: ${rowKey}`);
+      rowMap[rowKey].closeRow();
+    }
+  };
       // Render the front of the row
 const renderItem = (data, rowMap) => (
     <TouchableHighlight
@@ -464,7 +474,7 @@ const renderItem = (data, rowMap) => (
         style={styles.taskLogo}
     />
       ) :<Image
-      source={require('../../../assets/no1.png')}
+      source={require('../../../assets/no2.png')}
       style={styles.taskLogo}
   />}
         <Text style={styles.taskText}>{data.item.name}</Text>
@@ -477,7 +487,7 @@ const renderItem = (data, rowMap) => (
     <View style={styles.rowBack}>
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnLeft]}
-        onPress={() => toggleTaskCompletion(data.item.id)}
+        onPress={() => toggleTaskCompletion(data.item.id, rowMap, data.item.id)}
       >
         <Image
       source={require('../../../assets/yes1.png')}
@@ -487,7 +497,7 @@ const renderItem = (data, rowMap) => (
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnCenter]}
-        onPress={() => showEditModal(data.item)}
+        onPress={() => showEditModal(data.item, rowMap, data.item.id)}
       >
 
         <Image
@@ -508,7 +518,7 @@ const renderItem = (data, rowMap) => (
       </TouchableOpacity>
       <TouchableOpacity
       style={[styles.backRightBtn, styles.backRightBtnRightLast]}
-      onPress={() => handleSelectForWheel(data.item.id)}
+      onPress={() => handleSelectForWheel(data.item.id, rowMap, data.item.id)}
     >
                 <Image
       source={require('../../../assets/wheel.png')}
@@ -591,6 +601,7 @@ const renderItem = (data, rowMap) => (
         data={displayedTasks}
         renderItem={renderItem}
         renderHiddenItem={renderHiddenItem}
+        keyExtractor={(item) => item.id.toString()}
         // leftOpenValue={150} 
         rightOpenValue={-300} 
         disableRightSwipe={true}
@@ -650,13 +661,7 @@ const renderItem = (data, rowMap) => (
             style={styles.saveButton}
             onPress={handleUpdateTask}
           >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDeleteTask}
-          >
-            <Text style={styles.deleteButtonText}>Delete</Text>
+            <Text style={styles.saveButtonText}>Ok</Text>
           </TouchableOpacity>
         </View>
       </View>

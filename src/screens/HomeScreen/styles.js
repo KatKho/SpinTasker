@@ -109,7 +109,7 @@ export default StyleSheet.create({
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          marginTop: 22,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
         },
         datePickerModal: {
           backgroundColor: 'white',
@@ -316,6 +316,9 @@ backRightBtn: {
   bottom: 0,
   justifyContent: 'center',
   position: 'absolute',
+  // borderWidth:1,
+  // borderColor: '#fff',
+
   top: 0,
   width: 75,
   height: 60
@@ -365,6 +368,4 @@ pointer: {
   shadowColor: 'black',
   shadowOffset: { height: 1, width: 0 },
 },
-
-
     })
