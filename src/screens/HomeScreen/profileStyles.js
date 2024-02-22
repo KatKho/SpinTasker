@@ -1,39 +1,57 @@
 import { StyleSheet } from 'react-native';
-
 export default StyleSheet.create({
     profile: {
-        width: 45,
-        height: 45,
-        marginLeft: 10,
+      width: 40,
+      height: 40,
+      borderRadius: 25,
+      overflow: 'hidden',
+      borderColor: '#e1e1e1',
+      borderWidth: 1,
+      marginLeft: 10,
+      marginTop: 10,
+    },
+    modal: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      margin: 0,
+    },
+    modalContent: {
+      backgroundColor: 'white',
+      padding: 20,
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      width: '80%',
+      borderRadius: 20,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    button: {
+      backgroundColor: '#1a73e8',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 20,
+      alignItems: 'center',
+      marginTop: 20,
+      width: '100%',
+    },
+    buttonText: {
+      color: 'white',
+      fontWeight: 'bold',
+    },
+    modalText: {
+        fontSize: 16,
+        color: '#333',
+        marginVertical: 5, 
       },
-      modal: {
-        // marginTop: 30,
-        marginLeft: 10,
-        marginTop: 150,
-        // The following properties are used to center the modal on the screen
-        flex: 1,
-        justifyContent: 'flex-start',
-        // justifyContent: 'center',
-        // alignItems: 'center',
+    
+      modalTitleText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 15, 
       },
-      
-      modalContent: {
-        backgroundColor: 'white',
-        padding: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
-        // Make width and height equal for a circle and adjust size as needed
-        width: 150,
-        height: 150,
-        // Set borderRadius to half of the width/height to make it a circle
-        borderRadius: 75,
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-        // Optionally, you can add elevation for shadow for Android and shadow properties for iOS
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-      },
-      
+    
     })

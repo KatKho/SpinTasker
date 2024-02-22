@@ -1,59 +1,83 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Button, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
 import Modal from 'react-native-modal';
-import styles from './profileStyles'; // Assume your styles are defined here
 import { getAuth, signOut } from 'firebase/auth';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import styles from './profileStyles';
+import { app } from '../../firebase/config'; 
 
-const Profile = ({ navigation }) => {
+const Profile = ({ navigation, userUID }) => {
   const auth = getAuth();
+  const db = getFirestore(app);
   const [isModalVisible, setModalVisible] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [taskStatistics, setTaskStatistics] = useState({ completed: 0, pending: 0 });
 
   useEffect(() => {
     const user = auth.currentUser;
-    if (user !== null) {
-      // The user object has basic properties such as email, etc.
-      const email = user.email || 'No email available';
-      // You can set the userEmail in state
-      setUserEmail(email);
+    if (user) {
+      setUserEmail(user.email || 'No email available');
+      loadTaskStatistics();
     }
-  }, [auth.currentUser]); // This effect will run when the component mounts and whenever the current user changes
+  }, [auth.currentUser, isModalVisible]);
+
+  const loadTaskStatistics = async () => {
+    try {
+      const q = query(collection(db, "tasks"), where("userId", "==", userUID));
+      const querySnapshot = await getDocs(q);
+      let completed = 0;
+      let pending = 0;
+      querySnapshot.forEach((doc) => {
+        if (doc.data().completed) {
+          completed++;
+        } else {
+          pending++;
+        }
+      });
+      setTaskStatistics({ completed, pending });
+    } catch (error) {
+      console.error('Failed to load task statistics', error);
+    }
+  };
+
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigation.navigate('Login');
+      navigation.replace('Login'); 
     } catch (error) {
-      console.error('Sign out error', error);
+      Alert.alert("Error", "Failed to sign out");
     }
   };
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleModal}>
         <Image
-          source={require('../../../assets/person1.png')} // Your local image
+          source={require('../../../assets/person1.png')} 
           style={styles.profile}
         />
       </TouchableOpacity>
 
+
       <Modal
         isVisible={isModalVisible}
-        animationIn="slideInLeft" // Here we define the animation for sliding in from the left
-        animationOut="slideOutLeft" // And similarly for sliding out to the left
         onBackdropPress={toggleModal}
         onBackButtonPress={toggleModal}
-        swipeDirection={['left', 'right']} // Allow swiping to close either left or right
-        style={styles.modal} // This is to ensure the modal comes in from the side
+        style={styles.modal}
       >
         <View style={styles.modalContent}>
-        <Text style={styles.userEmail}>{userEmail}</Text>
-          <Button title="Sign Out" onPress={handleSignOut} />
-          {/* <Button title="Close" onPress={toggleModal} /> */}
+        <Text style={styles.modalTitleText}>Profile Details</Text>
+        <Text style={styles.modalText}>Email: {userEmail}</Text>
+        <Text style={styles.modalText}>Completed tasks: {taskStatistics.completed}</Text>
+        <Text style={styles.modalText}>Pending tasks: {taskStatistics.pending}</Text>
+          <TouchableOpacity onPress={handleSignOut} style={styles.button}>
+            <Text style={styles.buttonText}>Sign Out</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>

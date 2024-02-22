@@ -533,7 +533,11 @@ const renderItem = (data, rowMap) => (
       return (
 
         <View style={styles.container}>
-        <Profile navigation={navigation} />
+         <Profile 
+        navigation={navigation} 
+        userUID={userUID} 
+        onRefreshTasks={fetchTasks}
+        />
   
         <View style={styles.wheel}>
                     {
