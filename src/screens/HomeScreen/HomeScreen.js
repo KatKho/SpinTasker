@@ -8,6 +8,7 @@ import { app } from '../../firebase/config';
 import Svg, { Path, G, Polygon, Text as SVGText} from 'react-native-svg';
 import { Animated } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import Profile from './Profile';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
@@ -123,13 +124,13 @@ const addTask = async () => {
   
 
   // Function to handle sign-out
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Sign out error', error);
-    }
-  };
+//   const handleSignOut = async () => {
+//     try {
+//       await signOut(auth);
+//     } catch (error) {
+//       console.error('Sign out error', error);
+//     }
+//   };
   // Function to handle date change
   const onChangeDate = (event, newSelectedDate) => {
     const currentDate = newSelectedDate || selectedDate;
@@ -532,12 +533,7 @@ const renderItem = (data, rowMap) => (
       return (
 
         <View style={styles.container}>
-        <View style={styles.dropdownMenu}>
-          <TouchableOpacity onPress={() => {/* Logic for Profile */}}>
-            <Text>Profile</Text>
-          </TouchableOpacity>
-          <Button title="Sign Out" onPress={handleSignOut} />
-        </View>
+        <Profile navigation={navigation} />
   
         <View style={styles.wheel}>
                     {
