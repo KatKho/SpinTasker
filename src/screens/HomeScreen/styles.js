@@ -125,10 +125,10 @@ export default StyleSheet.create({
       shadowRadius: 4,
       elevation: 5
       },
-       confirmButton: {
+      confirmButton: {
       backgroundColor: '#0275d8', // Bootstrap info blue for confirm button
       borderRadius: 10,
-      paddingVertical: 15,
+      paddingVertical: 12,
       paddingHorizontal: 30,
       alignSelf: 'center', // Center button in modal
       marginTop: 10,
@@ -136,7 +136,8 @@ export default StyleSheet.create({
       confirmButtonText: {
       color: 'white',
       fontWeight: 'bold',
-      textAlign: 'center'
+      textAlign: 'center',
+      fontSize: 16,
       },
   
       taskModal: {
@@ -170,30 +171,26 @@ export default StyleSheet.create({
       backgroundColor: '#fafafa', // Slightly off-white background
       fontSize: 16, // Larger font size
     },
-    
     saveButton: {
-      backgroundColor: '#5cb85c', // Bootstrap success green for save button
+      backgroundColor: '#6BCB77',
       borderRadius: 10,
       paddingVertical: 10,
       paddingHorizontal: 20,
       alignSelf: 'center', 
     },
-    
     saveButtonText: {
       color: 'white',
       fontSize: 16,
       fontWeight: 'bold',
       textAlign: 'center',
     },
-    
     cancelButton: {
-      backgroundColor: '#d9534f', // Bootstrap danger red for cancel/delete button
+      backgroundColor: '#FF6B6B', // Bootstrap danger red for cancel/delete button
       borderRadius: 10,
       paddingVertical: 10,
       paddingHorizontal: 20,
       alignSelf: 'center', 
     },
-    
     cancelButtonText: {
       color: 'white',
       fontSize: 16,
@@ -203,7 +200,7 @@ export default StyleSheet.create({
     buttonContainer: {
       flexDirection: 'row',
       justifyContent: 'space-evenly', 
-      marginTop: 20,
+      marginTop: 5,
     },
   
     deleteButton: {
@@ -368,4 +365,27 @@ pointer: {
   shadowColor: 'black',
   shadowOffset: { height: 1, width: 0 },
 },
+
+calendarModal: {
+  backgroundColor: 'white',
+  borderRadius: 20,
+  padding: 20,
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5
+},
+
+// Style for the calendar component
+calendar: {
+  borderWidth: 1,
+  borderColor: 'gray',
+  borderRadius: 8
+},
+
     })
