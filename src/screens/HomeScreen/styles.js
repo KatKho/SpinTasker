@@ -368,4 +368,27 @@ pointer: {
   shadowColor: 'black',
   shadowOffset: { height: 1, width: 0 },
 },
+
+calendarModal: {
+  backgroundColor: 'white',
+  borderRadius: 20,
+  padding: 20,
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5
+},
+
+// Style for the calendar component
+calendar: {
+  borderWidth: 1,
+  borderColor: 'gray',
+  borderRadius: 8
+},
+
     })

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+// import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
@@ -9,6 +9,7 @@ import Svg, { Path, G, Polygon, Text as SVGText} from 'react-native-svg';
 import { Animated } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Profile from './Profile';
+import { Calendar } from 'react-native-calendars';
 
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
@@ -21,7 +22,7 @@ export default function HomeScreen({ navigation, route }) {
 
   // Initialize state variables
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+//   const [showDatePicker, setShowDatePicker] = useState(false);
   const [allTasks, setAllTasks] = useState([]);
   const [displayedTasks, setDisplayedTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
@@ -34,6 +35,7 @@ export default function HomeScreen({ navigation, route }) {
   const [winningColor, setWinningColor] = useState('black');
   const [isFirstSpin, setIsFirstSpin] = useState(true);
   const [selectedTaskColors, setSelectedTaskColors] = useState({});
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
   const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF'];
@@ -109,7 +111,6 @@ const addTask = async () => {
     const tasksRef = collection(db, 'tasks');
     try {
       const docRef = await addDoc(tasksRef, newTask);
-      // Add the new task at the end of the array
       setAllTasks(prevTasks => [...prevTasks, { ...newTask, id: docRef.id }]);
       updateDisplayedTasks(selectedDate);
       fetchTasks();
@@ -122,23 +123,14 @@ const addTask = async () => {
     setIsTaskModalVisible(false);
   };
   
-
-  // Function to handle sign-out
-//   const handleSignOut = async () => {
-//     try {
-//       await signOut(auth);
-//     } catch (error) {
-//       console.error('Sign out error', error);
-//     }
-//   };
   // Function to handle date change
-  const onChangeDate = (event, newSelectedDate) => {
-    const currentDate = newSelectedDate || selectedDate;
-    setShowDatePicker(Platform.OS === 'ios');
-    setSelectedDate(currentDate);
-    setSelectedTasks([]);
-    updateDisplayedTasks(currentDate);
+  const handleDayPress = (day) => {
+    const newSelectedDate = new Date(day.dateString + 'T00:00:00');
+    setSelectedDate(newSelectedDate);
+    setShowCalendar(false); 
+    updateDisplayedTasks(newSelectedDate);
   };
+  
 
 // Toggle task completion
 const toggleTaskCompletion = async (taskId, rowMap, rowKey) => {
@@ -202,14 +194,23 @@ const handleUpdateTask = async () => {
   };
 
     // Function to show the date picker
-    const showDatePickerModal = () => {
-        setShowDatePicker(true);
+    // const showDatePickerModal = () => {
+    //     setShowDatePicker(true);
+    //   };
+    
+    // // Function to hide the date picker
+    // const hideDatePicker = () => {
+    //     setShowDatePicker(false);
+    // };
+
+    const showCalendarModal = () => {
+        setShowCalendar(true); 
       };
     
-    // Function to hide the date picker
-    const hideDatePicker = () => {
-        setShowDatePicker(false);
-    };
+      const hideCalendar = () => {
+        setShowCalendar(false);
+      };
+    
 
     const toggleTaskModal = () => {
         setTaskName('');
@@ -244,7 +245,6 @@ const handleUpdateTask = async () => {
     // Task is being deselected
     else {
       newSelectedTasks.splice(taskIndexInSelected, 1);
-      // Remove the task color from the selectedTaskColors state
       setSelectedTaskColors(prevColors => {
         const newColors = {...prevColors};
         delete newColors[taskId];
@@ -308,9 +308,9 @@ const handleUpdateTask = async () => {
     // };
 
       const PieSlice = ({ color, angle, index, tasksLength, task }) => {
-        const strokeWidth = 2; // Your stroke width
+        const strokeWidth = 2; 
         const radius = 100;
-        const adjustedRadius = radius - strokeWidth / 2; // Adjust the radius        
+        const adjustedRadius = radius - strokeWidth / 2;       
         const pathData = tasksLength === 1
         ? `M ${radius}, ${radius} m -${adjustedRadius}, 0 a ${adjustedRadius},${adjustedRadius} 0 1,0 ${adjustedRadius * 2},0 a ${adjustedRadius},${adjustedRadius} 0 1,0 -${adjustedRadius * 2},0`
         : describeArc(radius, radius, adjustedRadius, index * angle, (index + 1) * angle);
@@ -381,7 +381,7 @@ const handleUpdateTask = async () => {
             <Svg
                 height={pointerSize}
                 width={pointerSize}
-                style={styles.pointer} // Apply the style here
+                style={styles.pointer} 
                 >
                 <Polygon
                     points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
@@ -429,7 +429,7 @@ const handleUpdateTask = async () => {
           const numberOfSections = tasksForWheel.length;
           const sectionAngle = 360 / numberOfSections;
           let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
-          winningIndex = numberOfSections - (winningIndex + 1); // Adjust for the array indexing
+          winningIndex = numberOfSections - (winningIndex + 1); 
       
           // Set the winning task based on the winning index
           const winningTask = tasksForWheel[winningIndex];
@@ -462,7 +462,6 @@ const closeRow = (rowMap, rowKey) => {
       // Render the front of the row
 const renderItem = (data, rowMap) => (
     <TouchableHighlight
-    //   onPress={() => console.log('You touched me')}
     style={[styles.rowFront, { 
         backgroundColor: selectedTasks.includes(data.item.id) ? selectedTaskColors[data.item.id] || 'white' : 'white'
     }]}
@@ -555,7 +554,7 @@ const renderItem = (data, rowMap) => (
         </View>
 
       
-        <TouchableOpacity onPress={showDatePickerModal} style={styles.dateDisplay}>
+        <TouchableOpacity onPress={showCalendarModal} style={styles.dateDisplay}>
         <View style={styles.dateTextContainer}>
             <Image
             source={require('../../../assets/calendar.png')}
@@ -572,29 +571,28 @@ const renderItem = (data, rowMap) => (
         </TouchableOpacity>
         
         <Modal
-          visible={showDatePicker}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowDatePicker(false)}
+        visible={showCalendar}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCalendar(false)}
+      >
+    <View style={styles.centeredView}>
+      <View style={styles.calendarModal}>
+        <Calendar
+         current={selectedDate}
+         onDayPress={handleDayPress}
+          style={styles.calendar}
+          
+        />
+        <TouchableOpacity
+          style={styles.confirmButton}
+          onPress={hideCalendar}
         >
-          <View style={styles.centeredView}>
-            <View style={styles.datePickerModal}>
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display="spinner" 
-                textColor="black"
-                onChange={onChangeDate}
-              />
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={() => setShowDatePicker(false)}
-              >
-                <Text style={styles.confirmButtonText}>Confirm</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+          <Text style={styles.confirmButtonText}>Close</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </Modal>
               
     <View style={styles.taskList}>
     <SwipeListView
@@ -602,38 +600,9 @@ const renderItem = (data, rowMap) => (
         renderItem={renderItem}
         renderHiddenItem={renderHiddenItem}
         keyExtractor={(item) => item.id.toString()}
-        // leftOpenValue={150} 
         rightOpenValue={-300} 
         disableRightSwipe={true}
         />
-        {/* <FlatList
-            data={displayedTasks}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item: task }) => (
-            <TouchableOpacity 
-              key={task.id} 
-              onPress={() => toggleTaskCompletion(task.id)}
-            >
-            <View
-            key={task.id}
-            style={[
-              styles.taskItem,
-              { 
-                backgroundColor: selectedTasks.includes(task.id) ? task.color : 'transparent'
-              }
-            ]}
-          >
-            <CustomCheckbox taskId={task.id} />
-            <View style={{ flex: 2, flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={[styles.taskText, task.completed && styles.taskCompleted]}>
-            {task.name}
-            </Text>
-        {task.completed && <View style={styles.taskCompletedLine} />}
-      </View>
-              <TouchableOpacity onPress={() => showEditModal(task)}>
-    <Text style={{ fontSize: 25}}>✐</Text>
-  </TouchableOpacity> */}
-
     
   <Modal
     visible={isEditModalVisible}
@@ -667,17 +636,10 @@ const renderItem = (data, rowMap) => (
       </View>
     </View>
   </Modal>
-            {/* </View>
-            </TouchableOpacity> 
-          )}
-          /> */}
         </View> 
   
         <TouchableOpacity 
-        /* <Image 
-      source={require('../../../assets/add2.png')}
-      style={styles.addButton}
-  /> */
+
       style={styles.addButton}
       onPress={toggleTaskModal}
     >
