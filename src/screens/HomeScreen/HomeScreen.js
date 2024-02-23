@@ -11,6 +11,13 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import Profile from './Profile';
 import { Calendar } from 'react-native-calendars';
 
+const formatDateToString = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed, add 1
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
 export default function HomeScreen({ navigation, route }) {
   const auth = getAuth();
   const db = getFirestore(app);
@@ -21,6 +28,7 @@ export default function HomeScreen({ navigation, route }) {
   const finalAngleRef = useRef(0);
 
   // Initialize state variables
+  const [selectedDateString, setSelectedDateString] = useState(formatDateToString(new Date()));
   const [selectedDate, setSelectedDate] = useState(new Date());
 //   const [showDatePicker, setShowDatePicker] = useState(false);
   const [allTasks, setAllTasks] = useState([]);
@@ -126,11 +134,11 @@ const addTask = async () => {
   // Function to handle date change
   const handleDayPress = (day) => {
     const newSelectedDate = new Date(day.dateString + 'T00:00:00');
-    setSelectedDate(newSelectedDate);
-    setShowCalendar(false); 
+    setSelectedDate(newSelectedDate); // Keep this as a Date object for other uses
+    setSelectedDateString(day.dateString); // Use the string for the Calendar component
+    setShowCalendar(false);
     updateDisplayedTasks(newSelectedDate);
   };
-  
 
 // Toggle task completion
 const toggleTaskCompletion = async (taskId, rowMap, rowKey) => {
@@ -560,7 +568,7 @@ const renderItem = (data, rowMap) => (
             source={require('../../../assets/calendar.png')}
             style={styles.calendarIcon}
             />
-            <Text style={styles.dateText}>
+           <Text style={styles.dateText}>
             {selectedDate.toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
@@ -578,11 +586,10 @@ const renderItem = (data, rowMap) => (
       >
     <View style={styles.centeredView}>
       <View style={styles.calendarModal}>
-        <Calendar
-         current={selectedDate}
-         onDayPress={handleDayPress}
-          style={styles.calendar}
-          
+      <Calendar
+        current={selectedDateString}
+        onDayPress={handleDayPress}
+        style={styles.calendar}
         />
         <TouchableOpacity
           style={styles.confirmButton}
