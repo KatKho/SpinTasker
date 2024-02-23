@@ -13,7 +13,7 @@ import { Calendar } from 'react-native-calendars';
 
 const formatDateToString = (date) => {
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed, add 1
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
@@ -64,11 +64,9 @@ const fetchTasks = async () => {
     }
 };
 
-  
-  useEffect(() => {
-    fetchTasks();
-  }, [userUID]); // Runs only when the userUID changes
-  
+useEffect(() => {
+fetchTasks();
+}, [userUID]); // Runs only when the userUID changes
 
 // Effect to fetch tasks when userUID changes
 useEffect(() => {
@@ -560,7 +558,6 @@ const renderItem = (data, rowMap) => (
             )
             }
         </View>
-
       
         <TouchableOpacity onPress={showCalendarModal} style={styles.dateDisplay}>
         <View style={styles.dateTextContainer}>
