@@ -35,7 +35,7 @@ export default function RegistrationScreen({ navigation, setUser }) {
         const usersRef = doc(db, 'users', uid);
         setDoc(usersRef, data)
           .then(() => {
-            setUser(data);
+            // setUser(data);
             navigation.navigate('Home', { user: data });
           })
           .catch((error) => {

@@ -5,9 +5,6 @@ export default StyleSheet.create({
         flex: 1,
         alignItems: 'center'
     },
-    title: {
-
-    },
     logo: {
         flex: 1,
         height: 120,
@@ -54,5 +51,15 @@ export default StyleSheet.create({
         color: "#4D96FF",
         fontWeight: "bold",
         fontSize: 16
-    }
+    },
+    forgotPassword: {
+        alignSelf: 'center', 
+        marginTop: 20
+      },
+      
+      forgotPasswordText: {
+        color: '#4D96FF',    
+        fontSize: 16,          
+        fontWeight: 'bold',    
+      },
 })
