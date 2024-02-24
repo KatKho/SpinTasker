@@ -111,20 +111,20 @@ export default StyleSheet.create({
           alignItems: 'center',
           backgroundColor: 'rgba(0, 0, 0, 0.6)',
         },
-        datePickerModal: {
-          backgroundColor: 'white',
-          borderRadius: 20,
-          padding: 35,
-          alignItems: 'center',
-          shadowColor: '#000',
-          shadowOffset: {
-            width: 0,
-            height: 2
-          },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5
-      },
+        // datePickerModal: {
+        //   backgroundColor: 'white',
+        //   borderRadius: 20,
+        //   padding: 35,
+        //   alignItems: 'center',
+        //   shadowColor: '#000',
+        //   shadowOffset: {
+        //     width: 0,
+        //     height: 2
+        //   },
+      // shadowOpacity: 0.25,
+      // shadowRadius: 4,
+      // elevation: 5
+      // },
       confirmButton: {
       backgroundColor: '#0275d8', // Bootstrap info blue for confirm button
       borderRadius: 10,

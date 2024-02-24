@@ -58,7 +58,7 @@ const Profile = ({ navigation, userUID }) => {
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleModal}>
         <Image
-          source={require('../../../assets/person1.png')} 
+          source={require('../../../assets/pers.png')} 
           style={styles.profile}
         />
       </TouchableOpacity>
