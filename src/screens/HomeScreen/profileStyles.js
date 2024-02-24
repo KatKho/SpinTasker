@@ -40,13 +40,19 @@ export default StyleSheet.create({
     buttonText: {
       color: 'white',
       fontWeight: 'bold',
+      fontSize: 16
     },
     modalText: {
         fontSize: 16,
         color: '#333',
         marginVertical: 5, 
+        backgroundColor: '#fafafa',
+        height: 30, 
+        borderColor: '#fafafa',
+        borderWidth: 1,
+        borderRadius: 10,
+
       },
-    
       modalTitleText: {
         fontSize: 18,
         fontWeight: 'bold',
