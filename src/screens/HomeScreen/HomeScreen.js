@@ -183,15 +183,27 @@ const updateTask = async (taskId, updatedData) => {
   };
   
 // Function to handle updating a task
+// Function to handle updating a task
 const handleUpdateTask = async () => {
-    if (currentTask) {
-      await updateTask(currentTask.id, { name: taskName, description: taskDescription });
+  if (currentTask) {
+      const trimmedTaskName = taskName.trim();
+      // Only proceed if the task name is not empty
+      if (!trimmedTaskName) {
+          Alert.alert("Alert", "Please enter the task name or cancel");
+          return; // Exit the function early
+      }
+
+      // Since task name is valid, proceed with updating the task
+      await updateTask(currentTask.id, { name: trimmedTaskName, description: taskDescription });
+
+      // Update is successful, so we can close the modal and clear state
       setIsEditModalVisible(false);
       setCurrentTask(null);
       setTaskName('');
       setTaskDescription('');
-    }
-  };
+  }
+};
+
   
   // Function to handle deleting a task
   const handleDeleteTask = async () => {
@@ -532,10 +544,10 @@ const renderItem = (data, rowMap) => (
       onPress={() => handleSelectForWheel(data.item.id, rowMap, data.item.id)}
     >
                 <Image
-      source={require('../../../assets/wheel.png')}
+      source={require('../../../assets/wheel1.png')}
       style={styles.taskLogo}
   />
-      <Text style={styles.backTextWhite}>Select</Text>
+      <Text style={styles.backTextWhite}>Add</Text>
     </TouchableOpacity>
     </View>
   );

@@ -51,7 +51,7 @@ export default StyleSheet.create({
         fontSize: 16,
         marginLeft: 10,
         color: '#333333', 
-        fontWeight: '500', 
+        fontWeight:'bold',
       },
       taskCompletedLine: {
         position: 'absolute',
@@ -313,8 +313,8 @@ backRightBtn: {
   bottom: 0,
   justifyContent: 'center',
   position: 'absolute',
-  // borderWidth:1,
-  // borderColor: '#fff',
+  borderBottomWidth: 1,
+  borderColor: '#fff',
 
   top: 0,
   width: 75,
@@ -338,6 +338,7 @@ backRightBtnRightLast: {
 },
 backTextWhite: {
   color: '#FFF',
+  fontWeight:'bold',
 },
 taskLogo: {
 width: 25,
