@@ -106,6 +106,11 @@ useEffect(() => {
 
 // Function to add a task
 const addTask = async () => {
+    const trimmedTaskName = taskName.trim();
+    if (!trimmedTaskName) {
+      Alert.alert("Alert", "Please enter the task name or cancel");
+      return; 
+    }
     const newTask = {
       userId: userUID,
       name: taskName,
