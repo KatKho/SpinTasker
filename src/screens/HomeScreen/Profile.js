@@ -54,6 +54,13 @@ const Profile = ({ navigation, userUID }) => {
     setModalVisible(!isModalVisible);
   };
   
+  const InfoRow = ({ icon, text }) => (
+    <View style={styles.infoRow}>
+      <Image source={icon} style={styles.icon} />
+      <Text style={styles.infoText}>{text}</Text>
+    </View>
+  );
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleModal}>
@@ -71,10 +78,19 @@ const Profile = ({ navigation, userUID }) => {
         style={styles.modal}
       >
         <View style={styles.modalContent}>
-        <Text style={styles.modalTitleText}>Profile Details</Text>
-        <Text style={styles.modalText}>Email: {userEmail}</Text>
-        <Text style={styles.modalText}>Completed tasks: {taskStatistics.completed}</Text>
-        <Text style={styles.modalText}>Pending tasks: {taskStatistics.pending}</Text>
+          <Text style={styles.modalTitleText}>Profile Details</Text>
+          <InfoRow 
+            icon={require('../../../assets/email.png')} 
+            text={`Email: ${userEmail}`} 
+          />
+          <InfoRow 
+            icon={require('../../../assets/yes1.png')} 
+            text={`Completed tasks: ${taskStatistics.completed}`} 
+          />
+          <InfoRow 
+            icon={require('../../../assets/no2.png')} 
+            text={`Pending tasks: ${taskStatistics.pending}`} 
+          />
           <TouchableOpacity onPress={handleSignOut} style={styles.button}>
             <Text style={styles.buttonText}>Sign Out</Text>
           </TouchableOpacity>
