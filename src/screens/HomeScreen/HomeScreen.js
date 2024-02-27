@@ -9,6 +9,8 @@ import { Animated } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Profile from './Profile';
 import { Calendar } from 'react-native-calendars';
+import Slider from '@react-native-community/slider';
+
 
 const formatDateToString = (date) => {
     const year = date.getFullYear();
@@ -34,6 +36,7 @@ export default function HomeScreen({ navigation, route }) {
   const [displayedTasks, setDisplayedTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
+  const [taskPriority, setTaskPriority] = useState(1);
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
@@ -120,6 +123,7 @@ const addTask = async () => {
       userId: userUID,
       name: taskName,
       description: taskDescription,
+      priority: taskPriority,
       completed: false,
       date: selectedDate.toISOString(),
     };
@@ -579,6 +583,20 @@ const renderItem = (data, rowMap) => (
     </View>
   );
 
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 1:
+        return 'green'; // Low priority
+      case 2:
+        return 'yellow'; // Medium priority
+      case 3:
+        return 'red'; // High priority
+      default:
+        return 'grey'; // Default color
+    }
+  };
+  
+
       return (
 
         <View style={styles.container}>
@@ -668,6 +686,14 @@ const renderItem = (data, rowMap) => (
           value={taskDescription}
           onChangeText={setTaskDescription}
         />
+        <Slider
+          value={taskPriority}
+          onValueChange={value => setTaskPriority(value)}
+          maximumValue={3}
+          minimumValue={1}
+          step={1}
+          orientation="vertical"
+        />
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.saveButton}
@@ -711,6 +737,19 @@ const renderItem = (data, rowMap) => (
           multiline
           value={taskDescription}
           onChangeText={setTaskDescription}
+        />
+        <Text style={{ color: getPriorityColor(taskPriority), fontWeight: 'bold' }}>
+        Priority: {taskPriority === 1 ? 'Low' : taskPriority === 2 ? 'Medium' : 'High'}
+        </Text>
+        <Slider
+          value={taskPriority}
+          onValueChange={value => setTaskPriority(value)}
+          maximumValue={3}
+          minimumValue={1}
+          step={1}
+          orientation="vertical"
+          thumbTintColor={getPriorityColor(taskPriority)} // Set the color of the thumb
+          minimumTrackTintColor={getPriorityColor(taskPriority)} // Set the color of the track
         />
   <View style={styles.buttonContainer}>
     <TouchableOpacity
