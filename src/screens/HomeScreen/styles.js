@@ -3,7 +3,8 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#efefef',
+        
       },
       dropdownMenu: {
         // Styles for the dropdown menu will depend on the component you choose to implement it
@@ -51,7 +52,7 @@ export default StyleSheet.create({
         fontSize: 16,
         marginLeft: 10,
         color: '#333333', 
-        fontWeight: '500', 
+        fontWeight:'bold',
       },
       taskCompletedLine: {
         position: 'absolute',
@@ -76,8 +77,8 @@ export default StyleSheet.create({
         height: 65,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FF7F50', // You can adjust the color to match your theme
-        borderRadius: 40, // Half of the width/height to make it circular
+        backgroundColor: '#FF7F50', 
+        borderRadius: 40, 
         borderWidth: 2,
         borderColor: '#FFFFFF',
         shadowColor: '#000', // For iOS shadow
@@ -298,6 +299,8 @@ rowFront: {
   shadowColor: 'black',
   shadowOffset: { height: 1, width: 0 },
   elevation: 3, // Optional: Add elevation for shadow on Android
+  borderBottomWidth: 2, // Increase the border width for more distinctiveness
+  borderBottomColor: 'white', 
 },
 rowBack: {
   alignItems: 'center',
@@ -313,31 +316,32 @@ backRightBtn: {
   bottom: 0,
   justifyContent: 'center',
   position: 'absolute',
-  // borderWidth:1,
-  // borderColor: '#fff',
+  borderBottomWidth: 2,
+  borderColor: '#fff',
 
   top: 0,
   width: 75,
   height: 60
 },
 backRightBtnLeft: {
-  backgroundColor: 'green',
+  backgroundColor: '#efefef',
   right: 225,
 },
 backRightBtnCenter: {
-  backgroundColor: 'orange',
+  backgroundColor: '#efefef',
   right: 75,
 },
 backRightBtnRight: {
-  backgroundColor: 'red',
+  backgroundColor: '#efefef',
   right: 0,
 },
 backRightBtnRightLast: {
-  backgroundColor: 'blue',
+  backgroundColor: '#efefef',
   right: 150,
 },
 backTextWhite: {
-  color: '#FFF',
+  color: 'black',
+  fontWeight:'bold',
 },
 taskLogo: {
 width: 25,
@@ -387,5 +391,9 @@ calendar: {
   borderColor: 'gray',
   borderRadius: 8
 },
+footer: {
+  width: '100%',
+  backgroundColor: '#efefef'
+}
 
     })

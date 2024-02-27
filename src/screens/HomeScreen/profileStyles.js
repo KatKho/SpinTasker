@@ -10,6 +10,7 @@ export default StyleSheet.create({
     borderWidth: 1,
     marginLeft: 10,
     marginTop: 10,
+    backgroundColor: '#ffddd1'
   },
   modal: {
     justifyContent: 'center',

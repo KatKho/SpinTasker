@@ -5,9 +5,6 @@ export default StyleSheet.create({
         flex: 1,
         alignItems: 'center'
     },
-    title: {
-
-    },
     logo: {
         flex: 1,
         height: 120,
