@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
-// import DateTimePicker from '@react-native-community/datetimepicker';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
@@ -47,6 +46,12 @@ export default function HomeScreen({ navigation, route }) {
 
   const tasksForWheel = allTasks.filter(task => selectedTasks.includes(task.id));
   const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF'];
+  const defaultTasks = [
+    { id: 1, name: 'Task 1' },
+    { id: 2, name: 'Task 2' },
+    { id: 3, name: 'Task 3' },
+    { id: 4, name: 'Task 4' }
+  ];
 
 // Function to fetch tasks from Firestore
 const fetchTasks = async () => {
@@ -189,7 +194,7 @@ const handleUpdateTask = async () => {
       const trimmedTaskName = taskName.trim();
       // Only proceed if the task name is not empty
       if (!trimmedTaskName) {
-          Alert.alert("Alert", "Please enter the task name or cancel");
+          Alert.alert("Alert", "Please enter the task name");
           return; // Exit the function early
       }
 
@@ -278,6 +283,21 @@ const handleUpdateTask = async () => {
     setSelectedTasks(newSelectedTasks);
     closeRow(rowMap, rowKey);
 };
+
+// Add this function to assign colors to default tasks
+const assignColorsToDefaultTasks = () => {
+  const defaultTaskColors = {};
+  defaultTasks.forEach((task, index) => {
+    defaultTaskColors[task.id] = colors[index % colors.length];
+  });
+  setSelectedTaskColors(defaultTaskColors);
+};
+
+// Call this function when the component mounts to assign colors to default tasks
+useEffect(() => {
+  assignColorsToDefaultTasks();
+}, []);
+
 
     // Custom Checkbox Component
     // const CustomCheckbox = ({ taskId }) => {
@@ -446,7 +466,7 @@ const handleUpdateTask = async () => {
     
         //   Calculate the index of the section the pointer is pointing to
         if (tasksForWheel.length === 0) {
-            Alert.alert("No Tasks", "There are no tasks to select.");
+            Alert.alert("", "Select you tasks and spin again!");
             return; // Exit the function if there are no tasks
           }
           const numberOfSections = tasksForWheel.length;
@@ -484,20 +504,25 @@ const closeRow = (rowMap, rowKey) => {
   };
       // Render the front of the row
 const renderItem = (data, rowMap) => (
-    <TouchableHighlight
-    style={[styles.rowFront, { 
-        backgroundColor: selectedTasks.includes(data.item.id) ? selectedTaskColors[data.item.id] || 'white' : 'white'
-    }]}
-    //   underlayColor={'#AAA'}
-    >
+  <TouchableHighlight
+  style={[
+    styles.rowFront,
+    { 
+      backgroundColor: selectedTasks.includes(data.item.id) ? selectedTaskColors[data.item.id] || '#ffddd1' : '#ffddd1',
+      borderColor: selectedTasks.includes(data.item.id) ? selectedTaskColors[data.item.id] || '#ffddd1' : '#ffddd1',
+      borderWidth: 2,
+    }
+  ]}
+  underlayColor={'#AAA'}
+>
        <View style={styles.rowFrontContainer}>
         {data.item.completed ? (
         <Image
-        source={require('../../../assets/yes1.png')}
+        source={require('../../../assets/yesyes.png')}
         style={styles.taskLogo}
     />
       ) :<Image
-      source={require('../../../assets/no2.png')}
+      source={require('../../../assets/sad.png')}
       style={styles.taskLogo}
   />}
         <Text style={styles.taskText}>{data.item.name}</Text>
@@ -513,7 +538,7 @@ const renderItem = (data, rowMap) => (
         onPress={() => toggleTaskCompletion(data.item.id, rowMap, data.item.id)}
       >
         <Image
-      source={require('../../../assets/yes1.png')}
+      source={require('../../../assets/complete.png')}
       style={styles.taskLogo}
   />
         <Text style={styles.backTextWhite}>Complete</Text>
@@ -524,7 +549,7 @@ const renderItem = (data, rowMap) => (
       >
 
         <Image
-            source={require('../../../assets/edit.png')}
+            source={require('../../../assets/edit11.png')}
             style={styles.taskLogo}
         />
         <Text style={styles.backTextWhite}>Edit</Text>
@@ -534,7 +559,7 @@ const renderItem = (data, rowMap) => (
         onPress={() => deleteTask(data.item.id)}
       >
                 <Image
-      source={require('../../../assets/trash.png')}
+      source={require('../../../assets/trash1.png')}
       style={styles.taskLogo}
   />
         <Text style={styles.backTextWhite}>Delete</Text>
@@ -566,12 +591,7 @@ const renderItem = (data, rowMap) => (
             tasksForWheel.length > 0 ? (
                 <Wheel tasks={tasksForWheel} />
             ) : (
-                <View >
-                <Image
-                    source={require('../../../assets/wheelview.png')}
-                    style={styles.placeholderContainer}
-                />
-                </View>
+              <Wheel tasks={defaultTasks} />
             )
             }
         </View>
@@ -579,7 +599,7 @@ const renderItem = (data, rowMap) => (
         <TouchableOpacity onPress={showCalendarModal} style={styles.dateDisplay}>
         <View style={styles.dateTextContainer}>
             <Image
-            source={require('../../../assets/calendar.png')}
+            source={require('../../../assets/calendar1.png')}
             style={styles.calendarIcon}
             />
            <Text style={styles.dateText}>
@@ -658,7 +678,7 @@ const renderItem = (data, rowMap) => (
     </View>
   </Modal>
         </View> 
-  
+  <View style={styles.footer}>
         <TouchableOpacity 
 
       style={styles.addButton}
@@ -666,7 +686,7 @@ const renderItem = (data, rowMap) => (
     >
       <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
-  
+    </View>
         <Modal
     visible={isTaskModalVisible}
     transparent={true}
