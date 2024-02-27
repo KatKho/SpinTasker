@@ -9,6 +9,8 @@ import { Animated } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Profile from './Profile';
 import { Calendar } from 'react-native-calendars';
+import Slider from '@react-native-community/slider';
+
 
 const formatDateToString = (date) => {
     const year = date.getFullYear();
@@ -34,6 +36,7 @@ export default function HomeScreen({ navigation, route }) {
   const [displayedTasks, setDisplayedTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
+  const [taskPriority, setTaskPriority] = useState(1);
   const [isTaskModalVisible, setIsTaskModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
@@ -61,7 +64,7 @@ const fetchTasks = async () => {
         const tasks = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-        })).sort((a, b) => new Date(a.date) - new Date(b.date));
+          })).sort((a, b) => b.priority - a.priority);
         setAllTasks(tasks); 
         updateDisplayedTasks(selectedDate);
     } catch (error) {
@@ -92,18 +95,14 @@ useEffect(() => {
       return taskDate.toDateString() === newDate.toDateString();
     });
   
-    // Sort tasks so that completed tasks are at the bottom
+    // Sort tasks by priority (high to low) and then by completion status
     const sortedTasks = filteredTasks.sort((a, b) => {
-      // If 'a' is not completed and 'b' is, 'a' should come first
-      if (!a.completed && b.completed) {
-        return -1;
+      if (a.priority === b.priority) {
+        // If priorities are equal, sort by completion status
+        return a.completed === b.completed ? 0 : a.completed ? 1 : -1;
       }
-      // If 'a' is completed and 'b' is not, 'b' should come first
-      if (a.completed && !b.completed) {
-        return 1;
-      }
-      // If both have the same completed status, they stay in the same order
-      return 0;
+      // Otherwise, sort by priority
+      return b.priority - a.priority;
     });
   
     setDisplayedTasks(sortedTasks);
@@ -120,6 +119,7 @@ const addTask = async () => {
       userId: userUID,
       name: taskName,
       description: taskDescription,
+      priority: taskPriority,
       completed: false,
       date: selectedDate.toISOString(),
     };
@@ -133,9 +133,10 @@ const addTask = async () => {
     } catch (error) {
       console.error('Error adding task: ', error);
     }
-  
+
     setTaskName('');
     setTaskDescription('');
+    setTaskPriority(1);
     setIsTaskModalVisible(false);
   };
   
@@ -188,26 +189,29 @@ const updateTask = async (taskId, updatedData) => {
   };
   
 // Function to handle updating a task
-// Function to handle updating a task
 const handleUpdateTask = async () => {
   if (currentTask) {
       const trimmedTaskName = taskName.trim();
-      // Only proceed if the task name is not empty
       if (!trimmedTaskName) {
           Alert.alert("Alert", "Please enter the task name");
-          return; // Exit the function early
+          return;
       }
 
-      // Since task name is valid, proceed with updating the task
-      await updateTask(currentTask.id, { name: trimmedTaskName, description: taskDescription });
+      await updateTask(currentTask.id, { 
+          name: trimmedTaskName, 
+          description: taskDescription, 
+          priority: taskPriority // Update the priority from the current state
+      });
 
-      // Update is successful, so we can close the modal and clear state
       setIsEditModalVisible(false);
       setCurrentTask(null);
       setTaskName('');
       setTaskDescription('');
+      // Optionally reset the taskPriority here if you want to clear it after update
+      // setTaskPriority(1); // Reset to default or any desired value
   }
 };
+
 
   
   // Function to handle deleting a task
@@ -242,7 +246,8 @@ const handleUpdateTask = async () => {
 
     const toggleTaskModal = () => {
         setTaskName('');
-        setTaskDescription('');      
+        setTaskDescription('');  
+        setTaskPriority(1);       
     setIsTaskModalVisible(!isTaskModalVisible);
     };
       
@@ -250,6 +255,7 @@ const handleUpdateTask = async () => {
         setCurrentTask(task);
         setTaskName(task.name);
         setTaskDescription(task.description);
+        setTaskPriority(task.priority);
         setIsEditModalVisible(true);
         closeRow(rowMap, rowKey);
       };
@@ -579,6 +585,19 @@ const renderItem = (data, rowMap) => (
     </View>
   );
 
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 1:
+        return '#6BCB77'; // Low priority
+      case 2:
+        return '#FFD93D'; // Medium priority
+      case 3:
+        return '#FF6B6B'; // High priority
+      default:
+        return 'grey'; // Default color
+    }
+  };
+  
       return (
 
         <View style={styles.container}>
@@ -664,9 +683,21 @@ const renderItem = (data, rowMap) => (
         <TextInput
           style={styles.input}
           placeholder="Description"
-          multiline
           value={taskDescription}
           onChangeText={setTaskDescription}
+        />
+          <Text style={{ color: getPriorityColor(taskPriority), fontWeight: 'bold' }}>
+        Priority: {taskPriority === 1 ? 'Low' : taskPriority === 2 ? 'Medium' : 'High'}
+        </Text>
+        <Slider
+          value={taskPriority}
+          onValueChange={value => setTaskPriority(value)}
+          maximumValue={3}
+          minimumValue={1}
+          step={1}
+          orientation="vertical"
+          thumbTintColor={getPriorityColor(taskPriority)} 
+          minimumTrackTintColor={getPriorityColor(taskPriority)}
         />
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -708,9 +739,20 @@ const renderItem = (data, rowMap) => (
           style={styles.input}
           placeholder="Description"
           placeholderTextColor="#ddd"
-          multiline
           value={taskDescription}
           onChangeText={setTaskDescription}
+        />
+        <Text style={{ color: getPriorityColor(taskPriority), fontWeight: 'bold' }}>
+        Priority: {taskPriority === 1 ? 'Low' : taskPriority === 2 ? 'Medium' : 'High'}
+        </Text>
+        <Slider
+          value={taskPriority}
+          onValueChange={value => setTaskPriority(value)}
+          maximumValue={3}
+          minimumValue={1}
+          step={1}
+          thumbTintColor={getPriorityColor(taskPriority)} 
+          minimumTrackTintColor={getPriorityColor(taskPriority)}
         />
   <View style={styles.buttonContainer}>
     <TouchableOpacity
