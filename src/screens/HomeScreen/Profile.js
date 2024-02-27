@@ -80,15 +80,15 @@ const Profile = ({ navigation, userUID }) => {
         <View style={styles.modalContent}>
           <Text style={styles.modalTitleText}>Profile Details</Text>
           <InfoRow 
-            icon={require('../../../assets/email.png')} 
+            icon={require('../../../assets/mail.png')} 
             text={`Email: ${userEmail}`} 
           />
           <InfoRow 
-            icon={require('../../../assets/yes1.png')} 
+            icon={require('../../../assets/yesyes.png')} 
             text={`Completed tasks: ${taskStatistics.completed}`} 
           />
           <InfoRow 
-            icon={require('../../../assets/no2.png')} 
+            icon={require('../../../assets/sad.png')} 
             text={`Pending tasks: ${taskStatistics.pending}`} 
           />
           <TouchableOpacity onPress={handleSignOut} style={styles.button}>

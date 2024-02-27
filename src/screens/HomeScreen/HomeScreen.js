@@ -537,8 +537,9 @@ const renderItem = (data, rowMap) => (
         style={[styles.backRightBtn, styles.backRightBtnLeft]}
         onPress={() => toggleTaskCompletion(data.item.id, rowMap, data.item.id)}
       >
+    {/* <a href="https://www.flaticon.com/free-icons/goal" title="goal icons">Goal icons created by Freepik - Flaticon</a> */}
         <Image
-      source={require('../../../assets/complete.png')}
+      source={require('../../../assets/goal.png')}
       style={styles.taskLogo}
   />
         <Text style={styles.backTextWhite}>Complete</Text>
@@ -547,9 +548,9 @@ const renderItem = (data, rowMap) => (
         style={[styles.backRightBtn, styles.backRightBtnCenter]}
         onPress={() => showEditModal(data.item, rowMap, data.item.id)}
       >
-
+      {/* <a href="https://www.flaticon.com/free-icons/settings" title="settings icons">Settings icons created by srip - Flaticon</a> */}
         <Image
-            source={require('../../../assets/edit11.png')}
+            source={require('../../../assets/settings.png')}
             style={styles.taskLogo}
         />
         <Text style={styles.backTextWhite}>Edit</Text>
@@ -568,8 +569,9 @@ const renderItem = (data, rowMap) => (
       style={[styles.backRightBtn, styles.backRightBtnRightLast]}
       onPress={() => handleSelectForWheel(data.item.id, rowMap, data.item.id)}
     >
-                <Image
-      source={require('../../../assets/wheel1.png')}
+   {/* <a href="https://www.flaticon.com/free-icons/wheel-of-fortune" title="wheel of fortune icons">Wheel of fortune icons created by Freepik - Flaticon</a> */}
+    <Image
+      source={require('../../../assets/wheel-of-fortune.png')}
       style={styles.taskLogo}
   />
       <Text style={styles.backTextWhite}>Add</Text>
