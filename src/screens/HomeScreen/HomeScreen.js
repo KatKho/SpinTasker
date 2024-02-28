@@ -254,7 +254,7 @@ const handleUpdateTask = async () => {
       const showEditModal = (task, rowMap, rowKey) => {
         setCurrentTask(task);
         setTaskName(task.name);
-        setTaskDescription(task.description);
+        setTaskDescription(task.description.toString());
         setTaskPriority(task.priority);
         setIsEditModalVisible(true);
         closeRow(rowMap, rowKey);
@@ -597,7 +597,7 @@ const renderItem = (data, rowMap) => (
         return 'grey'; // Default color
     }
   };
-  
+
       return (
 
         <View style={styles.container}>
