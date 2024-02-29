@@ -110,24 +110,16 @@ export default StyleSheet.create({
       },
       centeredView: {
           flex: 1,
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          // backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        },
+        centeredViewCalendar: {
+          flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          // backgroundColor: 'rgba(0, 0, 0, 0.6)',
         },
-        // datePickerModal: {
-        //   backgroundColor: 'white',
-        //   borderRadius: 20,
-        //   padding: 35,
-        //   alignItems: 'center',
-        //   shadowColor: '#000',
-        //   shadowOffset: {
-        //     width: 0,
-        //     height: 2
-        //   },
-      // shadowOpacity: 0.25,
-      // shadowRadius: 4,
-      // elevation: 5
-      // },
       confirmButton: {
       backgroundColor: '#0275d8', // Bootstrap info blue for confirm button
       borderRadius: 10,
@@ -142,12 +134,10 @@ export default StyleSheet.create({
       textAlign: 'center',
       fontSize: 16,
       },
-  
       taskModal: {
           backgroundColor: 'white',
           borderRadius: 20,
           padding: 20,
-          width: '90%', // Adjust the width if necessary
           alignSelf: 'center',
           shadowColor: '#000',
           shadowOffset: {
@@ -157,7 +147,24 @@ export default StyleSheet.create({
           shadowOpacity: 0.25,
           shadowRadius: 4,
           elevation: 5,
+          width: '100%',
+          paddingBottom: 30,
         },
+        // taskModal: {
+        //   backgroundColor: 'white',
+        //   borderRadius: 20,
+        //   padding: 20,
+        //   width: '90%', // Adjust the width if necessary
+        //   alignSelf: 'center',
+        //   shadowColor: '#000',
+        //   shadowOffset: {
+        //     width: 0,
+        //     height: 2,
+        //   },
+        //   shadowOpacity: 0.25,
+        //   shadowRadius: 4,
+        //   elevation: 5,
+        // },
     modalTitle: {
       fontSize: 24,
       fontWeight: 'bold',

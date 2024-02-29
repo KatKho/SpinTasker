@@ -32,7 +32,7 @@ export default StyleSheet.create({
     
   },
   button: {
-    backgroundColor: '#FF6B6B', // Using one of the app's primary colors
+    backgroundColor: '#FF6B6B', 
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 10,
@@ -62,7 +62,6 @@ export default StyleSheet.create({
       backgroundColor: '#f8f9fa', // Lighter background for input fields
       borderRadius: 10, // Consistent border radius
     },
-    
     icon: {
       width: 25,
       height: 25,

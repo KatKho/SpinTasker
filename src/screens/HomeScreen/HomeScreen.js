@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity, Modal, TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
+import { Platform, View, Text, TouchableOpacity,TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
+import Modal from 'react-native-modal';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
 import styles from './styles';
 import { app } from '../../firebase/config'; 
@@ -10,6 +11,8 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import Profile from './Profile';
 import { Calendar } from 'react-native-calendars';
 import Slider from '@react-native-community/slider';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
 
 
 const formatDateToString = (date) => {
@@ -634,12 +637,15 @@ const renderItem = (data, rowMap) => (
         </TouchableOpacity>
         
         <Modal
-        visible={showCalendar}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowCalendar(false)}
+        isVisible={showCalendar}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        onBackdropPress={() => setShowCalendar(false)} 
+        onBackButtonPress={() => setShowCalendar(false)} 
+        backdropOpacity={0.7} 
+        style={{ margin: 0, justifyContent: 'flex-end' }} 
       >
-    <View style={styles.centeredView}>
+    <View style={styles.centeredViewCalendar}>
       <View style={styles.calendarModal}>
       <Calendar
         current={selectedDateString}
@@ -666,23 +672,33 @@ const renderItem = (data, rowMap) => (
         disableRightSwipe={true}
         />
     
-  <Modal
-    visible={isEditModalVisible}
-    transparent={true}
-    animationType="slide"
-    onRequestClose={() => setIsEditModalVisible(false)}
+        <Modal
+      isVisible={isEditModalVisible}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      onBackdropPress={() => setIsEditModalVisible(false)} 
+      onBackButtonPress={() => setIsEditModalVisible(false)} 
+      backdropOpacity={0.7} 
+      style={{ margin: 0, justifyContent: 'flex-end' }} 
+    >
+      <KeyboardAwareScrollView 
+    resetScrollToCoords={{ x: 0, y: 0 }}
+    scrollEnabled={true}
+    contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
   >
     <View style={styles.centeredView}>
       <View style={styles.taskModal}>
         <TextInput
           style={styles.input}
           placeholder="Name"
+          placeholderTextColor="#ddd"
           value={taskName}
           onChangeText={setTaskName}
         />
         <TextInput
           style={styles.input}
           placeholder="Description"
+          placeholderTextColor="#ddd"
           value={taskDescription}
           onChangeText={setTaskDescription}
         />
@@ -709,6 +725,7 @@ const renderItem = (data, rowMap) => (
         </View>
       </View>
     </View>
+    </KeyboardAwareScrollView>
   </Modal>
         </View> 
   <View style={styles.footer}>
@@ -720,11 +737,19 @@ const renderItem = (data, rowMap) => (
       <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
     </View>
-        <Modal
-    visible={isTaskModalVisible}
-    transparent={true}
-    animationType="slide"
-    onRequestClose={toggleTaskModal}
+    <Modal
+  isVisible={isTaskModalVisible}
+  animationIn="slideInUp"
+  animationOut="slideOutDown"
+  onBackdropPress={toggleTaskModal} 
+  onBackButtonPress={toggleTaskModal} 
+  backdropOpacity={0.7} 
+  style={{ margin: 0, justifyContent: 'flex-end' }} 
+>
+<KeyboardAwareScrollView 
+    resetScrollToCoords={{ x: 0, y: 0 }}
+    scrollEnabled={true}
+    contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
   >
     <View style={styles.centeredView}>
       <View style={styles.taskModal}>
@@ -770,6 +795,7 @@ const renderItem = (data, rowMap) => (
   </View>
       </View>
     </View>
+    </KeyboardAwareScrollView>
   </Modal>
       </View>
     );
