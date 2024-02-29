@@ -32,13 +32,13 @@ export default StyleSheet.create({
     
   },
   button: {
-    backgroundColor: '#1a73e8',
-    paddingVertical: 12, // Slightly larger touch area
-    paddingHorizontal: 25, // Slightly larger touch area
-    borderRadius: 10, // Consistent border radius
+    backgroundColor: '#FF6B6B', 
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
-    width: '80%', // Match modal width
+    width: '80%',
   },
   buttonText: {
     color: 'white',
@@ -62,7 +62,6 @@ export default StyleSheet.create({
       backgroundColor: '#f8f9fa', // Lighter background for input fields
       borderRadius: 10, // Consistent border radius
     },
-    
     icon: {
       width: 25,
       height: 25,
@@ -70,6 +69,7 @@ export default StyleSheet.create({
     },
     
     infoText: {
+      paddingTop: 3,
       fontSize: 16,
       color: '#333',
     },
