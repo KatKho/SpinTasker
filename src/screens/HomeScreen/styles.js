@@ -94,7 +94,9 @@ export default StyleSheet.create({
       dateText: {
         alignSelf: 'center',
         alignItems: 'center',
-        fontSize: 16
+        fontSize: 16,
+        color: '#4A4A4A',
+        
       },
       dateTextContainer: {
         flexDirection: 'row',
@@ -389,7 +391,7 @@ calendarModal: {
 calendar: {
   borderWidth: 1,
   borderColor: 'gray',
-  borderRadius: 8
+  borderRadius: 8,
 },
 footer: {
   width: '100%',

@@ -472,7 +472,7 @@ useEffect(() => {
     
         //   Calculate the index of the section the pointer is pointing to
         if (tasksForWheel.length === 0) {
-            Alert.alert("", "Select you tasks and spin again!");
+            Alert.alert("", "Select your tasks and spin again!");
             return; // Exit the function if there are no tasks
           }
           const numberOfSections = tasksForWheel.length;
