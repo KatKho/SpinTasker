@@ -22,10 +22,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.spinnertask.todoapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c66ac6a7-6bc8-4d6e-8590-d56cdc9ddaf3"
+      }
+    },
+    "runtimeVersion": "sdk-50.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/c66ac6a7-6bc8-4d6e-8590-d56cdc9ddaf3"
     }
   }
 }
