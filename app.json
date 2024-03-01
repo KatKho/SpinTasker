@@ -30,14 +30,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "d4a42cda-db83-4a4a-bf99-27d5b0d44fdc"
+        "projectId": "c66ac6a7-6bc8-4d6e-8590-d56cdc9ddaf3"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "sdk-50.0.0",
     "updates": {
-      "url": "https://u.expo.dev/d4a42cda-db83-4a4a-bf99-27d5b0d44fdc"
+      "url": "https://u.expo.dev/c66ac6a7-6bc8-4d6e-8590-d56cdc9ddaf3"
     }
   }
 }

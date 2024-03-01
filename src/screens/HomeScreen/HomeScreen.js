@@ -150,6 +150,8 @@ const addTask = async () => {
     setSelectedDateString(day.dateString); // Use the string for the Calendar component
     setShowCalendar(false);
     updateDisplayedTasks(newSelectedDate);
+
+    setSelectedTasks([]);
   };
 
 // Toggle task completion
@@ -475,9 +477,16 @@ useEffect(() => {
     
         //   Calculate the index of the section the pointer is pointing to
         if (tasksForWheel.length === 0) {
-            Alert.alert("", "Select your tasks and spin again!");
-            return; // Exit the function if there are no tasks
-          }
+          Alert.alert("", "Select your tasks and spin again!", [
+            {
+              text: "OK",
+              onPress: () => {
+                spinValue.setValue(0); // Reset the spin value to 0 after "OK" is pressed
+              },
+            },
+          ]);
+          return; // Exit the function if there are no tasks
+        }
           const numberOfSections = tasksForWheel.length;
           const sectionAngle = 360 / numberOfSections;
           let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
@@ -490,6 +499,9 @@ useEffect(() => {
           Alert.alert(`${winningTask.name}`, "", [
             {
               text: "OK",
+              onPress: () => {
+                spinValue.setValue(0); // Reset the spin value to 0 after "OK" is pressed
+              },
             },
           ]);
         });
