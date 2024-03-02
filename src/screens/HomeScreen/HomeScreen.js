@@ -656,6 +656,9 @@ const renderItem = (data, rowMap) => (
         onBackButtonPress={() => setShowCalendar(false)} 
         backdropOpacity={0.7} 
         style={{ margin: 0, justifyContent: 'flex-end' }} 
+        animationOutTiming={500} 
+        backdropTransitionInTiming={500}
+        backdropTransitionOutTiming={500}
       >
     <View style={styles.centeredViewCalendar}>
       <View style={styles.calendarModal}>
@@ -692,6 +695,9 @@ const renderItem = (data, rowMap) => (
       onBackButtonPress={() => setIsEditModalVisible(false)} 
       backdropOpacity={0.7} 
       style={{ margin: 0, justifyContent: 'flex-end' }} 
+      animationOutTiming={500} 
+      backdropTransitionInTiming={500}
+      backdropTransitionOutTiming={500}
     >
       <KeyboardAwareScrollView 
     resetScrollToCoords={{ x: 0, y: 0 }}
@@ -757,6 +763,9 @@ const renderItem = (data, rowMap) => (
   onBackButtonPress={toggleTaskModal} 
   backdropOpacity={0.7} 
   style={{ margin: 0, justifyContent: 'flex-end' }} 
+  animationOutTiming={500} 
+  backdropTransitionInTiming={500}
+  backdropTransitionOutTiming={500}
 >
 <KeyboardAwareScrollView 
     resetScrollToCoords={{ x: 0, y: 0 }}
