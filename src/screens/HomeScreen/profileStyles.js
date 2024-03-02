@@ -4,7 +4,7 @@ export default StyleSheet.create({
   profile: {
     width: 40,
     height: 40,
-    borderRadius: 20, // Updated for more rounded edges
+    borderRadius: 20,
     overflow: 'hidden',
     borderColor: '#e1e1e1',
     borderWidth: 1,
@@ -19,14 +19,14 @@ export default StyleSheet.create({
   },
   modalContent: {
     backgroundColor: 'white',
-    padding: 22, // Increased padding for more space
-    justifyContent: 'center', // Centered content
-    alignItems: 'center', // Centered content
-    width: '85%', // Increased width for better use of space
-    borderRadius: 10, // Consistent border radius
+    padding: 22, 
+    justifyContent: 'center',
+    alignItems: 'center', 
+    width: '85%', 
+    borderRadius: 10, 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2, // Softened shadow
+    shadowOpacity: 0.2, 
     shadowRadius: 1.41,
     elevation: 2,
     
@@ -46,31 +46,45 @@ export default StyleSheet.create({
     fontSize: 16,
   },
   modalTitleText: {
-    fontSize: 20, // Slightly larger for better hierarchy
+    fontSize: 20, 
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 20, // Increased spacing
+    marginBottom: 20, 
   },
-    infoRow: {
-      width: '100%',
-      flexDirection: 'row', // Align children in a row
-      alignItems: 'flex-star', // Center children vertically
-      color: '#333',
-      marginVertical: 8, // Increased spacing
-      paddingHorizontal: 10, // Added padding
-      paddingVertical: 8, // Added padding
-      backgroundColor: '#f8f9fa', // Lighter background for input fields
-      borderRadius: 10, // Consistent border radius
-    },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    paddingVertical: 12, 
+    paddingHorizontal: 15, 
+    marginVertical: 8,
+    width: '100%', 
+  },
     icon: {
       width: 25,
       height: 25,
       marginRight: 10, 
     },
-    
     infoText: {
-      paddingTop: 3,
       fontSize: 16,
       color: '#333',
     },
+    input: {
+      borderBottomWidth: 1,
+      borderColor: '#333', 
+      flex: 1, 
+      padding: 8, 
+      fontSize: 16, 
+    },
+  
+    editIcon: {
+      width: 18,
+      height: 18,
+      marginLeft: 6,
+      marginBottom: 4
+    },
+    
+
 });

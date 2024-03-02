@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, TextInput } from 'react-native';
 import Modal from 'react-native-modal';
 import { getAuth, signOut } from 'firebase/auth';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import styles from './profileStyles';
 import { app } from '../../firebase/config'; 
+import InfoRow from './InfoRow';
 
 const Profile = ({ navigation, userUID }) => {
   const auth = getAuth();
@@ -12,14 +13,31 @@ const Profile = ({ navigation, userUID }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [taskStatistics, setTaskStatistics] = useState({ completed: 0, pending: 0 });
+  const [userName, setUserName] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
 
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUserEmail(user.email || 'No email available');
+      loadUserDetails(user.uid);
       loadTaskStatistics();
     }
   }, [auth.currentUser, isModalVisible]);
+
+  const loadUserDetails = async (uid) => {
+    try {
+      const userDoc = await getDocs(query(collection(db, "users"), where("id", "==", uid)));
+      if (!userDoc.empty) {
+        const userData = userDoc.docs[0].data();
+        setUserEmail(userData.email || 'No email available'); 
+        setUserName(userData.fullName || 'No name available'); 
+      }
+    } catch (error) {
+      console.error('Failed to load user details', error);
+    }
+  };
+  
 
   const loadTaskStatistics = async () => {
     try {
@@ -40,6 +58,21 @@ const Profile = ({ navigation, userUID }) => {
     }
   };
 
+  const updateUserName = async (uid, newName) => {
+    const userRef = doc(db, "users", uid); // Get a reference to the user document
+    try {
+      await updateDoc(userRef, {
+        fullName: newName, // Update the field with the new name
+      });
+      setUserName(newName); // Update the local state to the new name
+      setNewUserName(''); // Reset the new username input
+      setEditMode(false); // Exit edit mode
+      Alert.alert("Success", "Username updated successfully");
+    } catch (error) {
+      console.error('Failed to update user name', error);
+      Alert.alert("Error", "Failed to update username");
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -54,12 +87,15 @@ const Profile = ({ navigation, userUID }) => {
     setModalVisible(!isModalVisible);
   };
   
-  const InfoRow = ({ icon, text }) => (
-    <View style={styles.infoRow}>
-      <Image source={icon} style={styles.icon} />
-      <Text style={styles.infoText}>{text}</Text>
-    </View>
-  );
+  // const InfoRow = ({ icon, text, onPress, editIcon, children }) => (
+  //   <TouchableOpacity onPress={onPress} style={styles.infoRow}>
+  //     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  //       <Image source={icon} style={styles.icon} />
+  //       {!editMode ? <Text style={styles.infoText}>{text}</Text> : children}
+  //     </View>
+  //     {editIcon && !editMode && <Image source={editIcon} style={styles.editIcon} />}
+  //   </TouchableOpacity>
+  // );
   
   return (
     <View style={styles.container}>
@@ -69,8 +105,7 @@ const Profile = ({ navigation, userUID }) => {
           style={styles.profile}
         />
       </TouchableOpacity>
-
-
+  
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={toggleModal}
@@ -79,18 +114,33 @@ const Profile = ({ navigation, userUID }) => {
       >
         <View style={styles.modalContent}>
           <Text style={styles.modalTitleText}>Profile Details</Text>
+  
+          {/* Editable username row */}
+          <InfoRow
+            icon={require('../../../assets/username.png')}
+            label="Username: "
+            initialValue={userName}
+            updateFunction={(newName) => updateUserName(userUID, newName)}
+            editIcon={require('../../../assets/pencil.png')}
+          />
+  
+          {/* Static info rows */}
           <InfoRow 
             icon={require('../../../assets/mail.png')} 
-            text={`Email: ${userEmail}`} 
+            label="Email: "
+            initialValue={userEmail}
           />
           <InfoRow 
             icon={require('../../../assets/yesyes.png')} 
-            text={`Completed tasks: ${taskStatistics.completed}`} 
+            label="Completed tasks: "
+            initialValue={`${taskStatistics.completed}`}
           />
           <InfoRow 
             icon={require('../../../assets/sad.png')} 
-            text={`Pending tasks: ${taskStatistics.pending}`} 
+            label="Pending tasks: "
+            initialValue={`${taskStatistics.pending}`}
           />
+  
           <TouchableOpacity onPress={handleSignOut} style={styles.button}>
             <Text style={styles.buttonText}>Sign Out</Text>
           </TouchableOpacity>
@@ -98,6 +148,7 @@ const Profile = ({ navigation, userUID }) => {
       </Modal>
     </View>
   );
+  
 };
 
 export default Profile;
