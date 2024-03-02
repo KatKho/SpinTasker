@@ -10,37 +10,25 @@ import {decode, encode} from 'base-64'
 if (!global.btoa) { global.btoa = encode }
 if (!global.atob) { global.atob = decode }
 
-// LogBox.ignoreLogs(['No native splash screen registered for given view controller']);
 const Stack = createStackNavigator();
 
 export default function App() {
 
-  const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is signed in.
         setUser(user);
       } else {
-        // User is signed out.
         setUser(null);
       }
-      setLoading(false);
     });
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
-
-  if (loading) {
-    return (
-      // Add loading indicator if needed
-      <Text>Loading...</Text>
-    );
-  }
 
   return (
     <NavigationContainer>

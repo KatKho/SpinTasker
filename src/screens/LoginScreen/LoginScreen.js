@@ -3,7 +3,6 @@ import { Image, Text, TextInput, TouchableOpacity, View, ScrollView } from 'reac
 import styles from './styles';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
-
 export default function LoginScreen({ navigation, setUser }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -40,7 +39,6 @@ export default function LoginScreen({ navigation, setUser }) {
           });
       };
       
-
     return (
         <View style={styles.container}>
            <ScrollView

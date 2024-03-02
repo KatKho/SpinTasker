@@ -56,11 +56,10 @@ export default StyleSheet.create({
     forgotPassword: {
         alignSelf: 'center', 
         marginTop: 20
-      },
-      
-      forgotPasswordText: {
-        color: '#4D96FF',    
-        fontSize: 16,          
-        fontWeight: 'bold',    
-      },
+    },
+    forgotPasswordText: {
+    color: '#4D96FF',    
+    fontSize: 16,          
+    fontWeight: 'bold',    
+    },
 })

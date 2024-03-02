@@ -38,7 +38,6 @@ const Profile = ({ navigation, userUID }) => {
     }
   };
   
-
   const loadTaskStatistics = async () => {
     try {
       const q = query(collection(db, "tasks"), where("userId", "==", userUID));
@@ -94,7 +93,6 @@ const Profile = ({ navigation, userUID }) => {
     return 'Good Evening';
   };
   
-  
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <TouchableOpacity onPress={toggleModal}>
@@ -103,9 +101,9 @@ const Profile = ({ navigation, userUID }) => {
           style={styles.profile}
         />
       </TouchableOpacity>
-      <Text style={{ marginLeft: 10, marginTop: 12 }}>
+      {/* <Text style={{ marginLeft: 10, marginTop: 12 }}>
         {getGreetingTimeOfDay()}, {userName}!
-      </Text>
+      </Text> */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={toggleModal}
@@ -134,12 +132,12 @@ const Profile = ({ navigation, userUID }) => {
             initialValue={userEmail}
           />
           <InfoRow 
-            icon={require('../../../assets/yesyes.png')} 
+            icon={require('../../../assets/done.png')} 
             label="Completed tasks: "
             initialValue={`${taskStatistics.completed}`}
           />
           <InfoRow 
-            icon={require('../../../assets/sad.png')} 
+            icon={require('../../../assets/no.png')} 
             label="Pending tasks: "
             initialValue={`${taskStatistics.pending}`}
           />
