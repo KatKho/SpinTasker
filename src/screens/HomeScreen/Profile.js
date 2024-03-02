@@ -109,7 +109,8 @@ const Profile = ({ navigation, userUID }) => {
         onBackdropPress={toggleModal}
         onBackButtonPress={toggleModal}
         style={styles.modal}
-        animationOutTiming={500} 
+        animationInTiming={500}
+        animationOutTiming={500}
         backdropTransitionInTiming={500}
         backdropTransitionOutTiming={500}
       >

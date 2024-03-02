@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity,TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
+import { Platform, View, Text, TouchableOpacity,TextInput, Button, Easing, Alert, Image, TouchableHighlight, InteractionManager } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
 import Modal from 'react-native-modal';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -118,9 +118,9 @@ const addTask = async () => {
     const tasksRef = collection(db, 'tasks');
     try {
       const docRef = await addDoc(tasksRef, newTask);
-      setAllTasks(prevTasks => [...prevTasks, { ...newTask, id: docRef.id }]);
-      updateDisplayedTasks(selectedDate);
-      fetchTasks();
+      const newTaskWithId = { ...newTask, id: docRef.id };
+    setAllTasks(prevTasks => [...prevTasks, newTaskWithId]);
+    updateDisplayedTasks(selectedDate);
     } catch (error) {
       console.error('Error adding task: ', error);
     }
@@ -144,42 +144,53 @@ const addTask = async () => {
 
 // Toggle task completion
 const toggleTaskCompletion = async (taskId, rowMap, rowKey) => {
-    const task = allTasks.find(t => t.id === taskId);
-    if (task) {
-      const taskRef = doc(db, "tasks", taskId);
-      try {
-        await updateDoc(taskRef, {
-          completed: !task.completed
-        });
-        await fetchTasks(); 
-        closeRow(rowMap, rowKey);
-      } catch (error) {
-        console.error('Error toggling task completion: ', error);
-      }
+  const task = allTasks.find(t => t.id === taskId);
+  if (task) {
+    const taskRef = doc(db, "tasks", taskId);
+    try {
+      // Updates the task in the database
+      await updateDoc(taskRef, {
+        completed: !task.completed
+      });
+      // Updates the task locally in allTasks state
+      setAllTasks(prevTasks => prevTasks.map(t => 
+        t.id === taskId ? { ...t, completed: !t.completed } : t
+      ));
+      updateDisplayedTasks(selectedDate);
+      closeRow(rowMap, rowKey);
+    } catch (error) {
+      console.error('Error toggling task completion: ', error);
     }
-  };
+  }
+};
 
 // Function to update a task
 const updateTask = async (taskId, updatedData) => {
-    const taskRef = doc(db, "tasks", taskId);
-    try {
+  const taskRef = doc(db, "tasks", taskId);
+  try {
       await updateDoc(taskRef, updatedData);
-      fetchTasks();
-    } catch (error) {
+      // Update allTasks state locally
+      setAllTasks(prevTasks => prevTasks.map(task => 
+          task.id === taskId ? { ...task, ...updatedData } : task
+      ));
+      updateDisplayedTasks(selectedDate);
+  } catch (error) {
       console.error('Error updating task: ', error);
-    }
-  };
+  }
+};
   
   // Function to delete a task
   const deleteTask = async (taskId) => {
     const taskRef = doc(db, "tasks", taskId);
     try {
-      await deleteDoc(taskRef);
-      fetchTasks();
+        await deleteDoc(taskRef);
+        // Update allTasks state locally
+        setAllTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+        updateDisplayedTasks(selectedDate);
     } catch (error) {
-      console.error('Error deleting task: ', error);
+        console.error('Error deleting task: ', error);
     }
-  };
+};
   
 // Function to handle updating a task
 const handleUpdateTask = async () => {
@@ -213,10 +224,12 @@ const handleUpdateTask = async () => {
 
 
   const toggleTaskModal = () => {
+    InteractionManager.runAfterInteractions(() => {
       setTaskName('');
       setTaskDescription('');  
       setTaskPriority(1);       
   setIsTaskModalVisible(!isTaskModalVisible);
+    });
   };
       
   const showEditModal = (task, rowMap, rowKey) => {
@@ -359,17 +372,17 @@ const Wheel = ({ tasks }) => {
 
 
 const handleSpin = () => {
-  console.log("Spin clicked");
+  // console.log("Spin clicked");
   spinValue.setValue(0);
 
   const fullRotations = 1 + Math.floor(Math.random() * 6);
-  console.log(fullRotations);
+  // console.log(fullRotations);
   const randomDegrees = Math.random() * 360;
   const visualFinalAngle = fullRotations * 360 + randomDegrees;
 
   finalAngleRef.current = visualFinalAngle % 360;
 
-  console.log(`Starting animation with final angle: ${finalAngleRef.current}`);
+  // console.log(`Starting animation with final angle: ${finalAngleRef.current}`);
 
   Animated.timing(spinValue, {
     toValue: visualFinalAngle / 360,
@@ -377,7 +390,6 @@ const handleSpin = () => {
     easing: Easing.out(Easing.cubic),
     useNativeDriver: true,
   }).start(() => {
-    console.log("Animation completed");
 
   //   Calculate the index of the section the pointer is pointing to
   if (tasksForWheel.length === 0) {
@@ -416,9 +428,8 @@ useEffect(() => {
 
 // Helper function to close a row
 const closeRow = (rowMap, rowKey) => {
-    console.log(`Trying to close row: ${rowKey}`);
     if (rowMap[rowKey]) {
-      console.log(`Closing row: ${rowKey}`);
+      // console.log(`Closing row: ${rowKey}`);
       rowMap[rowKey].closeRow();
     }
   };
@@ -554,7 +565,8 @@ const renderItem = (data, rowMap) => (
         onBackButtonPress={() => setShowCalendar(false)} 
         backdropOpacity={0.7} 
         style={{ margin: 0, justifyContent: 'flex-end' }} 
-        animationOutTiming={500} 
+        animationInTiming={500}
+        animationOutTiming={500}
         backdropTransitionInTiming={500}
         backdropTransitionOutTiming={500}
       >
@@ -593,7 +605,8 @@ const renderItem = (data, rowMap) => (
       onBackButtonPress={() => setIsEditModalVisible(false)} 
       backdropOpacity={0.7} 
       style={{ margin: 0, justifyContent: 'flex-end' }} 
-      animationOutTiming={500} 
+      animationInTiming={500}
+      animationOutTiming={500}
       backdropTransitionInTiming={500}
       backdropTransitionOutTiming={500}
     >
@@ -661,7 +674,8 @@ const renderItem = (data, rowMap) => (
   onBackButtonPress={toggleTaskModal} 
   backdropOpacity={0.7} 
   style={{ margin: 0, justifyContent: 'flex-end' }} 
-  animationOutTiming={500} 
+  animationInTiming={500}
+  animationOutTiming={500}
   backdropTransitionInTiming={500}
   backdropTransitionOutTiming={500}
 >
