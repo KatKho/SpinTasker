@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Image, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import styles from './styles';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+
 
 export default function LoginScreen({ navigation, setUser }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-
+    
     const onFooterLinkPress = () => {
         navigation.navigate('Registration');
     };
@@ -43,9 +43,9 @@ export default function LoginScreen({ navigation, setUser }) {
 
     return (
         <View style={styles.container}>
-            <KeyboardAwareScrollView
-                style={{ flex: 1, width: '100%' }}
-                keyboardShouldPersistTaps="always">
+           <ScrollView
+            style={{ flex: 1, width: '100%' }}
+            >
                 <Image
                     style={styles.logo}
                     source={require('../../../assets/icon.png')}
@@ -53,11 +53,13 @@ export default function LoginScreen({ navigation, setUser }) {
                 <TextInput
                     style={styles.input}
                     placeholder='E-mail'
+                    keyboardType="email-address"
                     placeholderTextColor="#aaaaaa"
                     onChangeText={(text) => setEmail(text)}
                     value={email}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
+                    textContentType='oneTimeCode'
                 />
             
                 <TextInput
@@ -69,6 +71,7 @@ export default function LoginScreen({ navigation, setUser }) {
                     value={password}
                     underlineColorAndroid="transparent"
                     autoCapitalize="none"
+                    textContentType='oneTimeCode'
                 />
                 <TouchableOpacity
                     style={styles.button}
@@ -86,7 +89,7 @@ export default function LoginScreen({ navigation, setUser }) {
 
                 </View>
                 
-            </KeyboardAwareScrollView>
+            </ScrollView>
         </View>
     )
 }
