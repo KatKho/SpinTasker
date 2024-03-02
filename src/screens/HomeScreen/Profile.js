@@ -38,7 +38,6 @@ const Profile = ({ navigation, userUID }) => {
     }
   };
   
-
   const loadTaskStatistics = async () => {
     try {
       const q = query(collection(db, "tasks"), where("userId", "==", userUID));
@@ -59,14 +58,14 @@ const Profile = ({ navigation, userUID }) => {
   };
 
   const updateUserName = async (uid, newName) => {
-    const userRef = doc(db, "users", uid); // Get a reference to the user document
+    const userRef = doc(db, "users", uid); 
     try {
       await updateDoc(userRef, {
-        fullName: newName, // Update the field with the new name
+        fullName: newName, 
       });
-      setUserName(newName); // Update the local state to the new name
-      setNewUserName(''); // Reset the new username input
-      setEditMode(false); // Exit edit mode
+      setUserName(newName); 
+      setNewUserName('');
+      setEditMode(false); 
       Alert.alert("Success", "Username updated successfully");
     } catch (error) {
       console.error('Failed to update user name', error);
@@ -86,31 +85,34 @@ const Profile = ({ navigation, userUID }) => {
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-  
-  // const InfoRow = ({ icon, text, onPress, editIcon, children }) => (
-  //   <TouchableOpacity onPress={onPress} style={styles.infoRow}>
-  //     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-  //       <Image source={icon} style={styles.icon} />
-  //       {!editMode ? <Text style={styles.infoText}>{text}</Text> : children}
-  //     </View>
-  //     {editIcon && !editMode && <Image source={editIcon} style={styles.editIcon} />}
-  //   </TouchableOpacity>
-  // );
+
+  const getGreetingTimeOfDay = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
   
   return (
-    <View style={styles.container}>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <TouchableOpacity onPress={toggleModal}>
         <Image
           source={require('../../../assets/pers.png')} 
           style={styles.profile}
         />
       </TouchableOpacity>
-  
+      {/* <Text style={{ marginLeft: 10, marginTop: 12 }}>
+        {getGreetingTimeOfDay()}, {userName}!
+      </Text> */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={toggleModal}
         onBackButtonPress={toggleModal}
         style={styles.modal}
+        animationInTiming={500}
+        animationOutTiming={500}
+        backdropTransitionInTiming={500}
+        backdropTransitionOutTiming={500}
       >
         <View style={styles.modalContent}>
           <Text style={styles.modalTitleText}>Profile Details</Text>
@@ -131,12 +133,12 @@ const Profile = ({ navigation, userUID }) => {
             initialValue={userEmail}
           />
           <InfoRow 
-            icon={require('../../../assets/yesyes.png')} 
+            icon={require('../../../assets/done.png')} 
             label="Completed tasks: "
             initialValue={`${taskStatistics.completed}`}
           />
           <InfoRow 
-            icon={require('../../../assets/sad.png')} 
+            icon={require('../../../assets/no.png')} 
             label="Pending tasks: "
             initialValue={`${taskStatistics.pending}`}
           />

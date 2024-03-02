@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, Text, TouchableOpacity,TextInput, Button, Easing, Alert, Image, TouchableHighlight } from 'react-native';
+import { Platform, View, Text, TouchableOpacity,TextInput, Button, Easing, Alert, Image, TouchableHighlight, InteractionManager } from 'react-native';
 import { getAuth, signOut } from 'firebase/auth';
 import Modal from 'react-native-modal';
 import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, doc } from 'firebase/firestore';
@@ -12,8 +12,6 @@ import Profile from './Profile';
 import { Calendar } from 'react-native-calendars';
 import Slider from '@react-native-community/slider';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-
-
 
 const formatDateToString = (date) => {
     const year = date.getFullYear();
@@ -31,10 +29,8 @@ export default function HomeScreen({ navigation, route }) {
   const wheelSize = 200;
   const finalAngleRef = useRef(0);
 
-  // Initialize state variables
   const [selectedDateString, setSelectedDateString] = useState(formatDateToString(new Date()));
   const [selectedDate, setSelectedDate] = useState(new Date());
-//   const [showDatePicker, setShowDatePicker] = useState(false);
   const [allTasks, setAllTasks] = useState([]);
   const [displayedTasks, setDisplayedTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
@@ -44,8 +40,6 @@ export default function HomeScreen({ navigation, route }) {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [selectedTasks, setSelectedTasks] = useState([]);
-  const [winningTaskId, setWinningTaskId] = useState(null);
-  const [winningColor, setWinningColor] = useState('black');
   const [isFirstSpin, setIsFirstSpin] = useState(true);
   const [selectedTaskColors, setSelectedTaskColors] = useState({});
   const [showCalendar, setShowCalendar] = useState(false);
@@ -75,10 +69,6 @@ const fetchTasks = async () => {
     }
 };
 
-useEffect(() => {
-fetchTasks();
-}, [userUID]); // Runs only when the userUID changes
-
 // Effect to fetch tasks when userUID changes
 useEffect(() => {
     if (userUID) {
@@ -101,10 +91,8 @@ useEffect(() => {
     // Sort tasks by priority (high to low) and then by completion status
     const sortedTasks = filteredTasks.sort((a, b) => {
       if (a.priority === b.priority) {
-        // If priorities are equal, sort by completion status
         return a.completed === b.completed ? 0 : a.completed ? 1 : -1;
       }
-      // Otherwise, sort by priority
       return b.priority - a.priority;
     });
   
@@ -130,9 +118,9 @@ const addTask = async () => {
     const tasksRef = collection(db, 'tasks');
     try {
       const docRef = await addDoc(tasksRef, newTask);
-      setAllTasks(prevTasks => [...prevTasks, { ...newTask, id: docRef.id }]);
-      updateDisplayedTasks(selectedDate);
-      fetchTasks();
+      const newTaskWithId = { ...newTask, id: docRef.id };
+    setAllTasks(prevTasks => [...prevTasks, newTaskWithId]);
+    updateDisplayedTasks(selectedDate);
     } catch (error) {
       console.error('Error adding task: ', error);
     }
@@ -146,8 +134,8 @@ const addTask = async () => {
   // Function to handle date change
   const handleDayPress = (day) => {
     const newSelectedDate = new Date(day.dateString + 'T00:00:00');
-    setSelectedDate(newSelectedDate); // Keep this as a Date object for other uses
-    setSelectedDateString(day.dateString); // Use the string for the Calendar component
+    setSelectedDate(newSelectedDate);
+    setSelectedDateString(day.dateString); 
     setShowCalendar(false);
     updateDisplayedTasks(newSelectedDate);
 
@@ -156,42 +144,53 @@ const addTask = async () => {
 
 // Toggle task completion
 const toggleTaskCompletion = async (taskId, rowMap, rowKey) => {
-    const task = allTasks.find(t => t.id === taskId);
-    if (task) {
-      const taskRef = doc(db, "tasks", taskId);
-      try {
-        await updateDoc(taskRef, {
-          completed: !task.completed
-        });
-        await fetchTasks(); 
-        closeRow(rowMap, rowKey);
-      } catch (error) {
-        console.error('Error toggling task completion: ', error);
-      }
+  const task = allTasks.find(t => t.id === taskId);
+  if (task) {
+    const taskRef = doc(db, "tasks", taskId);
+    try {
+      // Updates the task in the database
+      await updateDoc(taskRef, {
+        completed: !task.completed
+      });
+      // Updates the task locally in allTasks state
+      setAllTasks(prevTasks => prevTasks.map(t => 
+        t.id === taskId ? { ...t, completed: !t.completed } : t
+      ));
+      updateDisplayedTasks(selectedDate);
+      closeRow(rowMap, rowKey);
+    } catch (error) {
+      console.error('Error toggling task completion: ', error);
     }
-  };
+  }
+};
 
 // Function to update a task
 const updateTask = async (taskId, updatedData) => {
-    const taskRef = doc(db, "tasks", taskId);
-    try {
+  const taskRef = doc(db, "tasks", taskId);
+  try {
       await updateDoc(taskRef, updatedData);
-      fetchTasks();
-    } catch (error) {
+      // Update allTasks state locally
+      setAllTasks(prevTasks => prevTasks.map(task => 
+          task.id === taskId ? { ...task, ...updatedData } : task
+      ));
+      updateDisplayedTasks(selectedDate);
+  } catch (error) {
       console.error('Error updating task: ', error);
-    }
-  };
+  }
+};
   
   // Function to delete a task
   const deleteTask = async (taskId) => {
     const taskRef = doc(db, "tasks", taskId);
     try {
-      await deleteDoc(taskRef);
-      fetchTasks();
+        await deleteDoc(taskRef);
+        // Update allTasks state locally
+        setAllTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+        updateDisplayedTasks(selectedDate);
     } catch (error) {
-      console.error('Error deleting task: ', error);
+        console.error('Error deleting task: ', error);
     }
-  };
+};
   
 // Function to handle updating a task
 const handleUpdateTask = async () => {
@@ -205,83 +204,56 @@ const handleUpdateTask = async () => {
       await updateTask(currentTask.id, { 
           name: trimmedTaskName, 
           description: taskDescription, 
-          priority: taskPriority // Update the priority from the current state
+          priority: taskPriority 
       });
 
       setIsEditModalVisible(false);
       setCurrentTask(null);
       setTaskName('');
       setTaskDescription('');
-      // Optionally reset the taskPriority here if you want to clear it after update
-      // setTaskPriority(1); // Reset to default or any desired value
   }
 };
 
-
+  const showCalendarModal = () => {
+      setShowCalendar(true); 
+    };
   
-  // Function to handle deleting a task
-  const handleDeleteTask = async () => {
-    if (currentTask) {
-      await deleteTask(currentTask.id);
-      setIsEditModalVisible(false);
-      setCurrentTask(null);
-      setTaskName('');
-      setTaskDescription('');
-    }
+  const hideCalendar = () => {
+    setShowCalendar(false);
   };
 
-    // Function to show the date picker
-    // const showDatePickerModal = () => {
-    //     setShowDatePicker(true);
-    //   };
-    
-    // // Function to hide the date picker
-    // const hideDatePicker = () => {
-    //     setShowDatePicker(false);
-    // };
 
-    const showCalendarModal = () => {
-        setShowCalendar(true); 
-      };
-    
-      const hideCalendar = () => {
-        setShowCalendar(false);
-      };
-    
-
-    const toggleTaskModal = () => {
-        setTaskName('');
-        setTaskDescription('');  
-        setTaskPriority(1);       
-    setIsTaskModalVisible(!isTaskModalVisible);
-    };
+  const toggleTaskModal = () => {
+    InteractionManager.runAfterInteractions(() => {
+      setTaskName('');
+      setTaskDescription('');  
+      setTaskPriority(1);       
+  setIsTaskModalVisible(!isTaskModalVisible);
+    });
+  };
       
-      const showEditModal = (task, rowMap, rowKey) => {
-        setCurrentTask(task);
-        setTaskName(task.name);
-        setTaskDescription(task.description.toString());
-        setTaskPriority(task.priority);
-        setIsEditModalVisible(true);
-        closeRow(rowMap, rowKey);
-      };
+  const showEditModal = (task, rowMap, rowKey) => {
+    setCurrentTask(task);
+    setTaskName(task.name);
+    setTaskDescription(task.description.toString());
+    setTaskPriority(task.priority);
+    setIsEditModalVisible(true);
+    closeRow(rowMap, rowKey);
+  };
       
-
   // Function to handle selection for the wheel, with color assignment
   const handleSelectForWheel = (taskId, rowMap, rowKey) => {
     let newSelectedTasks = [...selectedTasks];
     let taskIndexInSelected = selectedTasks.findIndex(id => id === taskId);
   
-    // Task is being selected
     if (taskIndexInSelected === -1) {
       newSelectedTasks.push(taskId);
-      // Assign color to the newly selected task
       let nextColorIndex = (newSelectedTasks.length - 1) % colors.length;
       setSelectedTaskColors(prevColors => ({
         ...prevColors,
         [taskId]: colors[nextColorIndex]
       }));
     }
-    // Task is being deselected
     else {
       newSelectedTasks.splice(taskIndexInSelected, 1);
       setSelectedTaskColors(prevColors => {
@@ -295,7 +267,6 @@ const handleUpdateTask = async () => {
     closeRow(rowMap, rowKey);
 };
 
-// Add this function to assign colors to default tasks
 const assignColorsToDefaultTasks = () => {
   const defaultTaskColors = {};
   defaultTasks.forEach((task, index) => {
@@ -304,226 +275,165 @@ const assignColorsToDefaultTasks = () => {
   setSelectedTaskColors(defaultTaskColors);
 };
 
-// Call this function when the component mounts to assign colors to default tasks
 useEffect(() => {
   assignColorsToDefaultTasks();
 }, []);
 
 
-    // Custom Checkbox Component
-    // const CustomCheckbox = ({ taskId }) => {
-    //     const isChecked = selectedTasks.includes(taskId);
-    //     return (
-    //         <TouchableOpacity
-    //             style={[styles.checkboxBase, isChecked && styles.checkboxChecked]}
-    //             onPress={() => handleCheckboxToggle(taskId)}
-    //         >
-    //             {isChecked && <Text style={styles.checkboxCheckmark}>♡</Text>}
-    //         </TouchableOpacity>
-    //     );
-    // };
 
-    // const usedHues = new Set();
+const PieSlice = ({ color, angle, index, tasksLength, task }) => {
+  const strokeWidth = 2; 
+  const radius = 100;
+  const adjustedRadius = radius - strokeWidth / 2;       
+  const pathData = tasksLength === 1
+  ? `M ${radius}, ${radius} m -${adjustedRadius}, 0 a ${adjustedRadius},${adjustedRadius} 0 1,0 ${adjustedRadius * 2},0 a ${adjustedRadius},${adjustedRadius} 0 1,0 -${adjustedRadius * 2},0`
+  : describeArc(radius, radius, adjustedRadius, index * angle, (index + 1) * angle);
 
-    // const getRandomColor = (theme) => {
-    //     let hue;
-    //     let saturation;
-    //     let lightness;
-        
-    //     // Attempt to find a unique hue that hasn't been used
-    //     do {
-    //         switch(theme) {
+  return (
+  <G>
+<Path d={pathData} fill={color} 
+  stroke="#FFFFFF" 
+  strokeWidth={2} />
+  </G>
+    );
+  };
 
-    //             case 'pastel':
-    //                 // Pastel colors: high lightness and saturation
-    //                 hue = Math.random() * 360; // Full range of hues
-    //                 break;
-    //             default:
-    //                 // Default to full range of hues
-    //                 hue = Math.random() * 360;
-    //         }
-    //     } while (usedHues.has(Math.floor(hue))); // Continue if the hue has been used
-    //     usedHues.add(Math.floor(hue)); // Add the hue to the set of used hues
-    
-    //     // Define saturation and lightness based on the theme
-    //     if (theme === 'pastel') {
-    //         saturation = Math.random() * (100 - 60) + 60; // Saturation between 60% and 100%
-    //         lightness = Math.random() * (90 - 75) + 75; // Lightness between 80% and 100%
-    //     } else {
-    //         saturation = Math.random() * 100;
-    //         lightness = 50;
-    //     }
-    
-    //     return `hsl(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(lightness)}%)`;
-    // };
+const describeArc = (x, y, radius, startAngle, endAngle) => {
+  const start = polarToCartesian(x, y, radius, endAngle);
+  const end = polarToCartesian(x, y, radius, startAngle);
 
-    // const resetUsedHues = () => {
-    //     usedHues.clear();
-    // };
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
 
-      const PieSlice = ({ color, angle, index, tasksLength, task }) => {
-        const strokeWidth = 2; 
-        const radius = 100;
-        const adjustedRadius = radius - strokeWidth / 2;       
-        const pathData = tasksLength === 1
-        ? `M ${radius}, ${radius} m -${adjustedRadius}, 0 a ${adjustedRadius},${adjustedRadius} 0 1,0 ${adjustedRadius * 2},0 a ${adjustedRadius},${adjustedRadius} 0 1,0 -${adjustedRadius * 2},0`
-        : describeArc(radius, radius, adjustedRadius, index * angle, (index + 1) * angle);
-      
-        return (
-        <G>
-      <Path d={pathData} fill={color} 
-        stroke="#FFFFFF" 
-        strokeWidth={2} />
-       </G>
-          );
-        };
-      
-      const describeArc = (x, y, radius, startAngle, endAngle) => {
-        const start = polarToCartesian(x, y, radius, endAngle);
-        const end = polarToCartesian(x, y, radius, startAngle);
-      
-        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-      
-        const d = [
-          "M", start.x, start.y, 
-          "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
-          "L", x, y,
-          "Z"
-        ].join(" ");
-      
-        return d;       
-      }
-      
-      const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-        const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-      
-        return {
-          x: centerX + (radius * Math.cos(angleInRadians)),
-          y: centerY + (radius * Math.sin(angleInRadians))
-        };
-      }
-      
-      const Wheel = ({ tasks }) => {
-        const radius = 100;
-        const angle = 360 / (tasks.length || 1);
-      
-        // Define the spin animation
-        const spin = spinValue.interpolate({
-            inputRange: [0, 1],
-            outputRange: ['0deg', `360deg`],
-          });
-        
-      
-        return (
-          <View style={styles.wheelContainer}>
-            <Animated.View style={{ transform: [{ rotate: spin }] }}>
-              <Svg height={wheelSize} width={wheelSize} viewBox={`0 0 ${wheelSize} ${wheelSize}`}>
-                <G transform={`translate(0, 0)`}>
-                  {tasks.map((task, index) => (
-                    <PieSlice
-                    key={task.id}
-                    task={task}
-                    color={selectedTaskColors[task.id]} 
-                    angle={angle}
-                    index={index}
-                    tasksLength={tasks.length}
-                  />
-                  ))}
-                </G>
-              </Svg>
-            </Animated.View>
-            <Svg
-                height={pointerSize}
-                width={pointerSize}
-                style={styles.pointer} 
-                >
-                <Polygon
-                    points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
-                    fill='white' 
-                />
-                </Svg>
-            <TouchableOpacity
-              style={styles.spinButton}
-              onPress={handleSpin}
-              activeOpacity={1}
-            >
-              <Text style={styles.spinButtonText}>SPIN</Text>
-            </TouchableOpacity>
-          </View>
-        );
-      };
-      
-      
-      const handleSpin = () => {
-        console.log("Spin clicked");
-        spinValue.setValue(0); // Reset the spin value to 0
-    
-        const fullRotations = 1 + Math.floor(Math.random() * 6);
-        console.log(fullRotations);
-        const randomDegrees = Math.random() * 360;
-        const visualFinalAngle = fullRotations * 360 + randomDegrees;
-    
-        finalAngleRef.current = visualFinalAngle % 360;
-    
-        console.log(`Starting animation with final angle: ${finalAngleRef.current}`);
-    
-        Animated.timing(spinValue, {
-          toValue: visualFinalAngle / 360,
-          duration: 5000,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }).start(() => {
-          console.log("Animation completed");
-    
-        //   Calculate the index of the section the pointer is pointing to
-        if (tasksForWheel.length === 0) {
-          Alert.alert("", "Select your tasks and spin again!", [
-            {
-              text: "OK",
-              onPress: () => {
-                spinValue.setValue(0); // Reset the spin value to 0 after "OK" is pressed
-              },
-            },
-          ]);
-          return; // Exit the function if there are no tasks
-        }
-          const numberOfSections = tasksForWheel.length;
-          const sectionAngle = 360 / numberOfSections;
-          let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
-          winningIndex = numberOfSections - (winningIndex + 1); 
-      
-          // Set the winning task based on the winning index
-          const winningTask = tasksForWheel[winningIndex];
-      
-          // Delay setting the state until after the alert is closed
-          Alert.alert(`${winningTask.name}`, "", [
-            {
-              text: "OK",
-              onPress: () => {
-                spinValue.setValue(0); // Reset the spin value to 0 after "OK" is pressed
-              },
-            },
-          ]);
-        });
-      };
-      useEffect(() => {
-        // console.log("Selected tasks: ", selectedTasks);
-        if (isFirstSpin && selectedTasks.length > 0) {
-          console.log("Initial spin triggered.");
-        //   handleSpin();
-          setIsFirstSpin(false); 
-        }
-      }, [selectedTasks]);
-    
+  const d = [
+    "M", start.x, start.y, 
+    "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+    "L", x, y,
+    "Z"
+  ].join(" ");
+
+  return d;       
+}
+
+const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+
+  return {
+    x: centerX + (radius * Math.cos(angleInRadians)),
+    y: centerY + (radius * Math.sin(angleInRadians))
+  };
+}
+
+const Wheel = ({ tasks }) => {
+  const angle = 360 / (tasks.length || 1);
+  const spin = spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', `360deg`],
+    });
+  
+
+  return (
+    <View style={styles.wheelContainer}>
+      <Animated.View style={{ transform: [{ rotate: spin }] }}>
+        <Svg height={wheelSize} width={wheelSize} viewBox={`0 0 ${wheelSize} ${wheelSize}`}>
+          <G transform={`translate(0, 0)`}>
+            {tasks.map((task, index) => (
+              <PieSlice
+              key={task.id}
+              task={task}
+              color={selectedTaskColors[task.id]} 
+              angle={angle}
+              index={index}
+              tasksLength={tasks.length}
+            />
+            ))}
+          </G>
+        </Svg>
+      </Animated.View>
+      <Svg
+          height={pointerSize}
+          width={pointerSize}
+          style={styles.pointer} 
+          >
+          <Polygon
+              points={`${pointerSize / 2},0 0,${pointerSize} ${pointerSize},${pointerSize}`}
+              fill='white' 
+          />
+          </Svg>
+      <TouchableOpacity
+        style={styles.spinButton}
+        onPress={handleSpin}
+        activeOpacity={1}
+      >
+        <Text style={styles.spinButtonText}>SPIN</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+
+const handleSpin = () => {
+  // console.log("Spin clicked");
+  spinValue.setValue(0);
+
+  const fullRotations = 1 + Math.floor(Math.random() * 6);
+  // console.log(fullRotations);
+  const randomDegrees = Math.random() * 360;
+  const visualFinalAngle = fullRotations * 360 + randomDegrees;
+
+  finalAngleRef.current = visualFinalAngle % 360;
+
+  // console.log(`Starting animation with final angle: ${finalAngleRef.current}`);
+
+  Animated.timing(spinValue, {
+    toValue: visualFinalAngle / 360,
+    duration: 5000,
+    easing: Easing.out(Easing.cubic),
+    useNativeDriver: true,
+  }).start(() => {
+
+  //   Calculate the index of the section the pointer is pointing to
+  if (tasksForWheel.length === 0) {
+    Alert.alert("", "Select your tasks and spin again!", [
+      {
+        text: "OK",
+        onPress: () => {
+          spinValue.setValue(0);
+        },
+      },
+    ]);
+    return; 
+  }
+    const numberOfSections = tasksForWheel.length;
+    const sectionAngle = 360 / numberOfSections;
+    let winningIndex = Math.floor(finalAngleRef.current / sectionAngle);
+    winningIndex = numberOfSections - (winningIndex + 1); 
+    const winningTask = tasksForWheel[winningIndex];
+
+    Alert.alert(`${winningTask.name}`, "", [
+      {
+        text: "OK",
+        onPress: () => {
+          spinValue.setValue(0); 
+        },
+      },
+    ]);
+  });
+};
+useEffect(() => {
+
+  if (isFirstSpin && selectedTasks.length > 0) {
+    setIsFirstSpin(false); 
+  }
+}, [selectedTasks]);
+
 // Helper function to close a row
 const closeRow = (rowMap, rowKey) => {
-    console.log(`Trying to close row: ${rowKey}`);
     if (rowMap[rowKey]) {
-      console.log(`Closing row: ${rowKey}`);
+      // console.log(`Closing row: ${rowKey}`);
       rowMap[rowKey].closeRow();
     }
   };
-      // Render the front of the row
+
 const renderItem = (data, rowMap) => (
   <TouchableHighlight
   style={[
@@ -539,11 +449,11 @@ const renderItem = (data, rowMap) => (
        <View style={styles.rowFrontContainer}>
         {data.item.completed ? (
         <Image
-        source={require('../../../assets/yesyes.png')}
+        source={require('../../../assets/done.png')}
         style={styles.taskLogo}
     />
       ) :<Image
-      source={require('../../../assets/sad.png')}
+      source={require('../../../assets/no.png')}
       style={styles.taskLogo}
   />}
         <Text style={styles.taskText}>{data.item.name}</Text>
@@ -551,7 +461,6 @@ const renderItem = (data, rowMap) => (
     </TouchableHighlight>
   );
   
-  // Render the hidden back of the row
   const renderHiddenItem = (data, rowMap) => (
     <View style={styles.rowBack}>
       <TouchableOpacity
@@ -656,6 +565,10 @@ const renderItem = (data, rowMap) => (
         onBackButtonPress={() => setShowCalendar(false)} 
         backdropOpacity={0.7} 
         style={{ margin: 0, justifyContent: 'flex-end' }} 
+        animationInTiming={500}
+        animationOutTiming={500}
+        backdropTransitionInTiming={500}
+        backdropTransitionOutTiming={500}
       >
     <View style={styles.centeredViewCalendar}>
       <View style={styles.calendarModal}>
@@ -692,6 +605,10 @@ const renderItem = (data, rowMap) => (
       onBackButtonPress={() => setIsEditModalVisible(false)} 
       backdropOpacity={0.7} 
       style={{ margin: 0, justifyContent: 'flex-end' }} 
+      animationInTiming={500}
+      animationOutTiming={500}
+      backdropTransitionInTiming={500}
+      backdropTransitionOutTiming={500}
     >
       <KeyboardAwareScrollView 
     resetScrollToCoords={{ x: 0, y: 0 }}
@@ -757,6 +674,10 @@ const renderItem = (data, rowMap) => (
   onBackButtonPress={toggleTaskModal} 
   backdropOpacity={0.7} 
   style={{ margin: 0, justifyContent: 'flex-end' }} 
+  animationInTiming={500}
+  animationOutTiming={500}
+  backdropTransitionInTiming={500}
+  backdropTransitionOutTiming={500}
 >
 <KeyboardAwareScrollView 
     resetScrollToCoords={{ x: 0, y: 0 }}

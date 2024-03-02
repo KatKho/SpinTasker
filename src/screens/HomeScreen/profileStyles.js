@@ -78,7 +78,6 @@ export default StyleSheet.create({
       padding: 8, 
       fontSize: 16, 
     },
-  
     editIcon: {
       width: 18,
       height: 18,
