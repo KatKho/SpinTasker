@@ -4,6 +4,10 @@ SpinTasker is a React Native mobile application that introduces a fun and intera
 
 **Note:** This project is still under development.
 
+**Demo Account:** To experience SpinTasker without signing up, use the following test account:
+- **Email**: test@gmail.com
+- **Password**: test123
+
 ## QR Code for iOS
 
 <img src="assets/eas-update.svg" alt="iOS QR Code" width="200" height="200"/>
