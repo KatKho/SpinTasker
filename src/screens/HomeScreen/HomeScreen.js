@@ -88,12 +88,12 @@ useEffect(() => {
       return taskDate.toDateString() === newDate.toDateString();
     });
   
-    // Sort tasks by priority (high to low) and then by completion status
+    // Sort tasks by completion status (uncompleted first) and then by priority (high to low)
     const sortedTasks = filteredTasks.sort((a, b) => {
-      if (a.priority === b.priority) {
-        return a.completed === b.completed ? 0 : a.completed ? 1 : -1;
+      if (a.completed === b.completed) {
+        return b.priority - a.priority; // Sort by priority if completion status is the same
       }
-      return b.priority - a.priority;
+      return a.completed ? 1 : -1; // Uncompleted tasks first
     });
   
     setDisplayedTasks(sortedTasks);
