@@ -587,15 +587,22 @@ const renderItem = (data, rowMap) => (
     </View>
   </Modal>
               
-    <View style={styles.taskList}>
-    <SwipeListView
-        data={displayedTasks}
-        renderItem={renderItem}
-        renderHiddenItem={renderHiddenItem}
-        keyExtractor={(item) => item.id.toString()}
-        rightOpenValue={-300} 
-        disableRightSwipe={true}
+  <View style={styles.taskList}>
+      {displayedTasks.length === 0 ? (
+        <View style={styles.noTasksContainer}>
+          <Image  source={require('../../../assets/relax.png')} style={styles.noTasksImage} />
+        </View>
+      ) : (
+        <SwipeListView
+          data={displayedTasks}
+          renderItem={renderItem}
+          renderHiddenItem={renderHiddenItem}
+          keyExtractor={(item) => item.id.toString()}
+          rightOpenValue={-300}
+          disableRightSwipe={true}
         />
+      )}
+
     
         <Modal
       isVisible={isEditModalVisible}
