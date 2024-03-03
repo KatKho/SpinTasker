@@ -14,6 +14,26 @@ SpinTasker is a React Native mobile application that introduces a fun and intera
 
 **Scan the QR code with your iOS device to test the app.**
 
+## Login Screen
+<img src="assest/IMG_8810.PNG" alt="Login Screen" height="300"/>
+*The login screen for SpinTasker where users can sign in or register.*
+
+## Main Interface
+<img src="assests/IMG_8812.PNG" alt="Main Interface" height="300"/>
+*The main interface of SpinTasker featuring the 'wheel of fortune' and task list with slide-to-edit and delete functionality.*
+
+## Task Management
+<img src="assests/IMG_8813.PNG" alt="Task Management" height="300"/>
+*Adding and managing tasks is streamlined with an easy-to-use interface.*
+
+## Profile Details
+<img src="assests/IMG_8816.PNG" alt="Profile Details" height="300"/>
+*Users can view and manage their profile details, including task completion statistics.*
+
+## Task Selection
+<img src="assests/IMG_8817.PNG" alt="Task Selection" height="300"/>
+*The 'wheel of fortune' feature in action, selecting a random task.*
+
 ## Features
 
 - **User Authentication**: Secure login and signup functionality to keep tasks private.
