@@ -26,13 +26,13 @@ SpinTasker is a React Native mobile application that introduces a fun and intera
 <img src="assets/IMG_8813.PNG" alt="Task Management" height="300"/>
 *Adding and managing tasks is streamlined with an easy-to-use interface.*
 
-## Profile Details
-<img src="assets/IMG_8816.PNG" alt="Profile Details" height="300"/>
-*Users can view and manage their profile details, including task completion statistics.*
-
 ## Task Selection
 <img src="assets/IMG_8817.PNG" alt="Task Selection" height="300"/>
 *The 'wheel of fortune' feature in action, selecting a random task.*
+
+## Profile Details
+<img src="assets/IMG_8816.PNG" alt="Profile Details" height="300"/>
+*Users can view and manage their profile details, including task completion statistics.*
 
 ## Features
 
