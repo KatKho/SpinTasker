@@ -332,5 +332,17 @@ export default StyleSheet.create({
     footer: {
         width: '100%',
         backgroundColor: '#efefef'
-    }
+    },
+    noTasksContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    noTasksImage :{
+        width: 200,
+        height: 200,
+        marginTop: 100,
+        resizeMode: 'contain',
+    },
+    
 });
