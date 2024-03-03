@@ -6,18 +6,18 @@ ToDoSpinner is a React Native mobile application that introduces a fun and inter
 
 ## QR Code for iOS
 
-![iOS QR Code](assets/ios-qr-code.svg)
+<img src="assets/ios-qr-code.svg" alt="iOS QR Code" width="200" height="200"/>
 
 **Scan the QR code with your iOS device to test the app.**
 
 ## Features
 
 - **User Authentication**: Secure login and signup functionality to keep your tasks private.
-- **User Profile**: Customizable user profiles with light/dark mode settings.
+- **User Profile**: Customizable user profiles.
 - **Task Management**: Add, edit, and delete tasks with ease.
 - **Wheel of Fortune**: Spin the wheel to randomly select a task for an engaging productivity experience.
 - **Calendar Integration**: View tasks in a calendar layout and manage deadlines.
-- **Task Editing Modal**: A dedicated modal for updating task details and setting due dates.
+- **Task Editing Modal**: A dedicated modal for updating task details.
 
 ## User Stories
 
