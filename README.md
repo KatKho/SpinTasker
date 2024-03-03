@@ -6,7 +6,7 @@ SpinTasker is a React Native mobile application that introduces a fun and intera
 
 ## QR Code for iOS
 
-<img src="assets/ios-qr-code.svg" alt="iOS QR Code" width="200" height="200"/>
+<img src="assets/eas-update.svg" alt="iOS QR Code" width="200" height="200"/>
 
 **Scan the QR code with your iOS device to test the app.**
 
