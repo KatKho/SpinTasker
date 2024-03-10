@@ -436,6 +436,7 @@ const closeRow = (rowMap, rowKey) => {
 
 const renderItem = (data, rowMap) => (
   <TouchableHighlight
+  testID="taskItem" 
   style={[
     styles.rowFront,
     { 
@@ -695,6 +696,7 @@ const renderItem = (data, rowMap) => (
     <View style={styles.centeredView}>
       <View style={styles.taskModal}>
         <TextInput
+          testID="taskNameInput"
           style={styles.input}
           placeholder="Name"
           placeholderTextColor="#ddd"
@@ -702,6 +704,7 @@ const renderItem = (data, rowMap) => (
           onChangeText={setTaskName}
         />
         <TextInput
+          testID="taskDescriptionInput"
           style={styles.input}
           placeholder="Description"
           placeholderTextColor="#ddd"
@@ -712,6 +715,7 @@ const renderItem = (data, rowMap) => (
         Priority: {taskPriority === 1 ? 'Low' : taskPriority === 2 ? 'Medium' : 'High'}
         </Text>
         <Slider
+          testID="prioritySlider"
           value={taskPriority}
           onValueChange={value => setTaskPriority(value)}
           maximumValue={3}
@@ -722,6 +726,7 @@ const renderItem = (data, rowMap) => (
         />
   <View style={styles.buttonContainer}>
     <TouchableOpacity
+      testID="addTaskConfirmButton"
       style={styles.saveButton}
       onPress={addTask}
     >

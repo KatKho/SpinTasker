@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native'; 
+import { render, fireEvent, act, waitFor, debug } from '@testing-library/react-native'; 
 import HomeScreen from '../src/screens/HomeScreen/HomeScreen';
 
 jest.mock('firebase/auth', () => ({
@@ -41,4 +41,27 @@ describe('HomeScreen', () => {
 
     expect(getByTestId('taskModal')).toBeTruthy();
   });
+
+  it('adds a new task', async () => {
+    const navigationMock = { navigate: jest.fn() };
+    const routeMock = { params: { userId: '123' } };
+    const { getByTestId, queryByTestId, getAllByTestId } = render(<HomeScreen navigation={navigationMock} route={routeMock} />);
+  
+    await waitFor(() => expect(getAllByTestId('taskItem')).toBeTruthy());
+  
+    const initialTaskCount = getAllByTestId('taskItem').length;
+  
+    fireEvent.press(getByTestId('addTaskButton'));
+    await waitFor(() => expect(queryByTestId('taskModal')).toBeTruthy());
+    fireEvent.changeText(getByTestId('taskNameInput'), 'New Task');
+    fireEvent.changeText(getByTestId('taskDescriptionInput'), 'Description of new task');
+    fireEvent.press(getByTestId('addTaskConfirmButton'));
+  
+    await waitFor(() => {
+      const updatedTaskCount = getAllByTestId('taskItem').length;
+      expect(updatedTaskCount).toBeGreaterThan(initialTaskCount);
+    }, { timeout: 5000 });
+  });
+  
+  
 });

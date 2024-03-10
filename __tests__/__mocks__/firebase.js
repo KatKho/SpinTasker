@@ -2,33 +2,40 @@ export const getFirestore = jest.fn();
 export const doc = jest.fn();
 export const setDoc = jest.fn();
 export const collection = jest.fn();
-export const addDoc = jest.fn();
+export const addDoc = jest.fn(() => {
+  return Promise.resolve({ id: 'mock-doc-id' });
+});
 
-// Updated getDocs mock to return a promise resolving to a query snapshot-like structure
 export const getDocs = jest.fn(() => Promise.resolve({
   docs: [
     {
       id: '1',
       data: () => ({
-        task: 'Sample Task 1',
+        name: 'Sample Task 1', 
+        description: 'Description for Task 1', 
         completed: false,
         priority: 1,
+        date: new Date().toISOString(), 
       }),
     },
     {
       id: '2',
       data: () => ({
-        task: 'Sample Task 2',
+        name: 'Sample Task 2', 
+        description: 'Description for Task 2', 
         completed: true,
         priority: 1,
+        date: new Date().toISOString(),
       }),
     },
   ],
 }));
 
+
 export const updateDoc = jest.fn();
 export const where = jest.fn();
-export const query = jest.fn(); // Adding a mock for 'query'
+export const query = jest.fn();
+
 
 export const firestore = {
   getFirestore,
@@ -39,7 +46,7 @@ export const firestore = {
   getDocs,
   updateDoc,
   where,
-  query, // Add query to the exported firestore object
+  query, 
 };
 
 export const auth = jest.fn();
