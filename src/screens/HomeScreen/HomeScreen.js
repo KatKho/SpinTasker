@@ -666,7 +666,7 @@ const renderItem = (data, rowMap) => (
         </View> 
   <View style={styles.footer}>
         <TouchableOpacity 
-
+        testID="addTaskButton"
       style={styles.addButton}
       onPress={toggleTaskModal}
     >
@@ -685,6 +685,7 @@ const renderItem = (data, rowMap) => (
   animationOutTiming={500}
   backdropTransitionInTiming={500}
   backdropTransitionOutTiming={500}
+  testID="taskModal"
 >
 <KeyboardAwareScrollView 
     resetScrollToCoords={{ x: 0, y: 0 }}
