@@ -62,6 +62,30 @@ describe('HomeScreen', () => {
       expect(updatedTaskCount).toBeGreaterThan(initialTaskCount);
     }, { timeout: 5000 });
   });
+
+  it('deletes a task', async () => {
+    const navigationMock = { navigate: jest.fn() };
+    const routeMock = { params: { userId: '123' } };
+    const { getByTestId, getAllByTestId, queryByTestId, queryAllByTestId } = render(<HomeScreen navigation={navigationMock} route={routeMock} />);
+  
+     await waitFor(() => expect(getAllByTestId('taskItem')).toBeTruthy());
+
+     const initialTaskCount = getAllByTestId('taskItem').length;
+
+     if (initialTaskCount > 0) {
+       const firstDeleteButton = getAllByTestId('deleteTaskButton')[0];
+       fireEvent.press(firstDeleteButton);
+   
+       await waitFor(() => {
+         const updatedTasks = queryAllByTestId('taskItem');
+         return expect(updatedTasks.length).toBeLessThan(initialTaskCount);
+       }); 
+     } else {
+       console.log("No tasks available to delete.");
+     }
+   });
+  
+  
   
   
 });

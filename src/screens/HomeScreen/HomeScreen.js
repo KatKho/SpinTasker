@@ -487,6 +487,7 @@ const renderItem = (data, rowMap) => (
         <Text style={styles.backTextWhite}>Edit</Text>
       </TouchableOpacity>
       <TouchableOpacity
+        testID="deleteTaskButton"
         style={[styles.backRightBtn, styles.backRightBtnRight]}
         onPress={() => deleteTask(data.item.id)}
       >

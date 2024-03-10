@@ -1,41 +1,55 @@
+const mockData = [
+  {
+    id: '1',
+    data: () => ({
+      name: 'Sample Task 1', 
+      description: 'Description for Task 1', 
+      completed: false,
+      priority: 1,
+      date: new Date().toISOString(),
+    }),
+  },
+  {
+    id: '2',
+    data: () => ({
+      name: 'Sample Task 2', 
+      description: 'Description for Task 2', 
+      completed: true,
+      priority: 1,
+      date: new Date().toISOString(),
+    }),
+  },
+];
+
 export const getFirestore = jest.fn();
-export const doc = jest.fn();
+export const doc = jest.fn((_, id) => ({ id }));
 export const setDoc = jest.fn();
 export const collection = jest.fn();
 export const addDoc = jest.fn(() => {
-  return Promise.resolve({ id: 'mock-doc-id' });
+  const newId = 'mock-doc-id'; 
+  mockData.push({
+    id: newId,
+    data: () => ({
+      name: 'New Task',
+      description: 'Description for New Task',
+      completed: false,
+      priority: 1,
+      date: new Date().toISOString(),
+    }),
+  });
+  return Promise.resolve({ id: newId });
 });
-
-export const getDocs = jest.fn(() => Promise.resolve({
-  docs: [
-    {
-      id: '1',
-      data: () => ({
-        name: 'Sample Task 1', 
-        description: 'Description for Task 1', 
-        completed: false,
-        priority: 1,
-        date: new Date().toISOString(), 
-      }),
-    },
-    {
-      id: '2',
-      data: () => ({
-        name: 'Sample Task 2', 
-        description: 'Description for Task 2', 
-        completed: true,
-        priority: 1,
-        date: new Date().toISOString(),
-      }),
-    },
-  ],
-}));
-
-
+export const getDocs = jest.fn(() => Promise.resolve({ docs: mockData }));
 export const updateDoc = jest.fn();
+export const deleteDoc = jest.fn((docRef) => {
+  const docIndex = mockData.findIndex(doc => doc.id === docRef.id);
+  if (docIndex > -1) {
+    mockData.splice(docIndex, 1);
+  }
+  return Promise.resolve();
+});
 export const where = jest.fn();
 export const query = jest.fn();
-
 
 export const firestore = {
   getFirestore,
@@ -45,8 +59,9 @@ export const firestore = {
   addDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   where,
-  query, 
+  query,
 };
 
 export const auth = jest.fn();
