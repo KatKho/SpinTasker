@@ -1,4 +1,4 @@
-const mockData = [
+export const mockData = [
   {
     id: '1',
     data: () => ({
@@ -40,7 +40,17 @@ export const addDoc = jest.fn(() => {
   return Promise.resolve({ id: newId });
 });
 export const getDocs = jest.fn(() => Promise.resolve({ docs: mockData }));
-export const updateDoc = jest.fn();
+export const updateDoc = jest.fn((docRef, updatedFields) => {
+  const docIndex = mockData.findIndex(doc => doc.id === docRef.id);
+  if (docIndex > -1) {
+    mockData[docIndex].data = () => ({
+      ...mockData[docIndex].data(),
+      ...updatedFields
+    });
+  }
+  return Promise.resolve();
+});
+
 export const deleteDoc = jest.fn((docRef) => {
   const docIndex = mockData.findIndex(doc => doc.id === docRef.id);
   if (docIndex > -1) {

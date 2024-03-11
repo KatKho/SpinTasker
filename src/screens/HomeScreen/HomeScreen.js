@@ -450,6 +450,7 @@ const renderItem = (data, rowMap) => (
        <View style={styles.rowFrontContainer}>
         {data.item.completed ? (
         <Image
+        testID="completedTaskImage"
         source={require('../../../assets/done.png')}
         style={styles.taskLogo}
     />
@@ -465,6 +466,7 @@ const renderItem = (data, rowMap) => (
   const renderHiddenItem = (data, rowMap) => (
     <View style={styles.rowBack}>
       <TouchableOpacity
+        testID="toggleCompleteButton"
         style={[styles.backRightBtn, styles.backRightBtnLeft]}
         onPress={() => toggleTaskCompletion(data.item.id, rowMap, data.item.id)}
       >

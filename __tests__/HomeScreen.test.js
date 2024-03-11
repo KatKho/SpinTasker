@@ -1,6 +1,7 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor, debug } from '@testing-library/react-native'; 
+import { render, fireEvent, act, waitFor, debug } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen/HomeScreen';
+import { mockData as importedMockData } from './__mocks__/firebase';
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(() => ({})),
@@ -17,10 +18,17 @@ jest.mock('firebase/firestore', () => require('./__mocks__/firebase'));
 jest.mock('@react-native-async-storage/async-storage', () => jest.fn());
 
 describe('HomeScreen', () => {
+  let localMockData;
+
+  beforeEach(() => {
+    localMockData = [...importedMockData];
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
+  // Test: Renders Correctly
   it('renders correctly', () => {
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: { userId: '123' } };
@@ -28,6 +36,7 @@ describe('HomeScreen', () => {
     expect(getByTestId('addTaskButton')).toBeTruthy();
   });
 
+  // Test: Opens Add Task Modal on Button Press
   it('opens add task modal on button press', async () => {
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: { userId: '123' } };
@@ -42,6 +51,7 @@ describe('HomeScreen', () => {
     expect(getByTestId('taskModal')).toBeTruthy();
   });
 
+  // Test: Adds a New Task
   it('adds a new task', async () => {
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: { userId: '123' } };
@@ -63,29 +73,53 @@ describe('HomeScreen', () => {
     }, { timeout: 5000 });
   });
 
+  // Test: Deletes a Task
   it('deletes a task', async () => {
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: { userId: '123' } };
     const { getByTestId, getAllByTestId, queryByTestId, queryAllByTestId } = render(<HomeScreen navigation={navigationMock} route={routeMock} />);
   
-     await waitFor(() => expect(getAllByTestId('taskItem')).toBeTruthy());
+    await waitFor(() => expect(getAllByTestId('taskItem')).toBeTruthy());
 
-     const initialTaskCount = getAllByTestId('taskItem').length;
+    const initialTaskCount = getAllByTestId('taskItem').length;
 
-     if (initialTaskCount > 0) {
-       const firstDeleteButton = getAllByTestId('deleteTaskButton')[0];
-       fireEvent.press(firstDeleteButton);
-   
-       await waitFor(() => {
-         const updatedTasks = queryAllByTestId('taskItem');
-         return expect(updatedTasks.length).toBeLessThan(initialTaskCount);
-       }); 
-     } else {
-       console.log("No tasks available to delete.");
-     }
-   });
+    if (initialTaskCount > 0) {
+      const firstDeleteButton = getAllByTestId('deleteTaskButton')[0];
+      fireEvent.press(firstDeleteButton);
   
-  
-  
-  
+      await waitFor(() => {
+        const updatedTasks = queryAllByTestId('taskItem');
+        return expect(updatedTasks.length).toBeLessThan(initialTaskCount);
+      }); 
+    } else {
+      console.log("No tasks available to delete.");
+    }
+  });
+
+  // Test: Toggles Task Completion
+  it('toggles task completion', async () => {
+    const navigationMock = { navigate: jest.fn() };
+    const routeMock = { params: { userId: '123' } };
+    const { getAllByTestId } = render(<HomeScreen navigation={navigationMock} route={routeMock} />);
+    
+    await waitFor(() => expect(getAllByTestId('taskItem')).toBeTruthy());
+    
+    let taskItems = await getAllByTestId('taskItem');
+    if (taskItems.length > 0) {
+      const initialCompletedState = taskItems[0].props.completed;
+      const taskId = localMockData[0].id;
+
+      localMockData = localMockData.map(task =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      );
+    
+      const toggleCompleteButtons = await getAllByTestId('toggleCompleteButton');
+      fireEvent.press(toggleCompleteButtons[0]);
+
+      const updatedTask = localMockData.find(task => task.id === taskId);
+      expect(updatedTask.completed).toBe(!initialCompletedState);
+    } else {
+      console.log("No tasks available for completion toggle.");
+    }
+  });
 });
