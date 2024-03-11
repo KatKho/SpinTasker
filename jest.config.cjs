@@ -15,7 +15,7 @@ module.exports = {
     '@testing-library/jest-native/extend-expect',
     '<rootDir>/jest.setup.js'  
   ],
-  // Remove the .js extension from extensionsToTreatAsEsm
+
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
   testEnvironment: 'node',
 };

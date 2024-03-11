@@ -436,6 +436,7 @@ const closeRow = (rowMap, rowKey) => {
 
 const renderItem = (data, rowMap) => (
   <TouchableHighlight
+  testID="taskItem" 
   style={[
     styles.rowFront,
     { 
@@ -449,6 +450,7 @@ const renderItem = (data, rowMap) => (
        <View style={styles.rowFrontContainer}>
         {data.item.completed ? (
         <Image
+        testID="completedTaskImage"
         source={require('../../../assets/done.png')}
         style={styles.taskLogo}
     />
@@ -464,6 +466,7 @@ const renderItem = (data, rowMap) => (
   const renderHiddenItem = (data, rowMap) => (
     <View style={styles.rowBack}>
       <TouchableOpacity
+        testID="toggleCompleteButton"
         style={[styles.backRightBtn, styles.backRightBtnLeft]}
         onPress={() => toggleTaskCompletion(data.item.id, rowMap, data.item.id)}
       >
@@ -475,6 +478,7 @@ const renderItem = (data, rowMap) => (
         <Text style={styles.backTextWhite}>Complete</Text>
       </TouchableOpacity>
       <TouchableOpacity
+        testID="editTaskButton"
         style={[styles.backRightBtn, styles.backRightBtnCenter]}
         onPress={() => showEditModal(data.item, rowMap, data.item.id)}
       >
@@ -486,6 +490,7 @@ const renderItem = (data, rowMap) => (
         <Text style={styles.backTextWhite}>Edit</Text>
       </TouchableOpacity>
       <TouchableOpacity
+        testID="deleteTaskButton"
         style={[styles.backRightBtn, styles.backRightBtnRight]}
         onPress={() => deleteTask(data.item.id)}
       >
@@ -605,6 +610,7 @@ const renderItem = (data, rowMap) => (
 
     
         <Modal
+      testID="taskEditModal"
       isVisible={isEditModalVisible}
       animationIn="slideInUp"
       animationOut="slideOutDown"
@@ -625,6 +631,7 @@ const renderItem = (data, rowMap) => (
     <View style={styles.centeredView}>
       <View style={styles.taskModal}>
         <TextInput
+          testID="taskNameInput"
           style={styles.input}
           placeholder="Name"
           placeholderTextColor="#ddd"
@@ -632,6 +639,7 @@ const renderItem = (data, rowMap) => (
           onChangeText={setTaskName}
         />
         <TextInput
+          testID="taskDescriptionInput"
           style={styles.input}
           placeholder="Description"
           placeholderTextColor="#ddd"
@@ -642,6 +650,7 @@ const renderItem = (data, rowMap) => (
         Priority: {taskPriority === 1 ? 'Low' : taskPriority === 2 ? 'Medium' : 'High'}
         </Text>
         <Slider
+          testID="prioritySlider"
           value={taskPriority}
           onValueChange={value => setTaskPriority(value)}
           maximumValue={3}
@@ -653,6 +662,7 @@ const renderItem = (data, rowMap) => (
         />
         <View style={styles.buttonContainer}>
           <TouchableOpacity
+            testID="saveTaskButton"
             style={styles.saveButton}
             onPress={handleUpdateTask}
           >
@@ -666,7 +676,7 @@ const renderItem = (data, rowMap) => (
         </View> 
   <View style={styles.footer}>
         <TouchableOpacity 
-
+        testID="addTaskButton"
       style={styles.addButton}
       onPress={toggleTaskModal}
     >
@@ -685,6 +695,7 @@ const renderItem = (data, rowMap) => (
   animationOutTiming={500}
   backdropTransitionInTiming={500}
   backdropTransitionOutTiming={500}
+  testID="taskModal"
 >
 <KeyboardAwareScrollView 
     resetScrollToCoords={{ x: 0, y: 0 }}
@@ -694,6 +705,7 @@ const renderItem = (data, rowMap) => (
     <View style={styles.centeredView}>
       <View style={styles.taskModal}>
         <TextInput
+          testID="taskNameInput"
           style={styles.input}
           placeholder="Name"
           placeholderTextColor="#ddd"
@@ -701,6 +713,7 @@ const renderItem = (data, rowMap) => (
           onChangeText={setTaskName}
         />
         <TextInput
+          testID="taskDescriptionInput"
           style={styles.input}
           placeholder="Description"
           placeholderTextColor="#ddd"
@@ -711,6 +724,7 @@ const renderItem = (data, rowMap) => (
         Priority: {taskPriority === 1 ? 'Low' : taskPriority === 2 ? 'Medium' : 'High'}
         </Text>
         <Slider
+          testID="prioritySlider"
           value={taskPriority}
           onValueChange={value => setTaskPriority(value)}
           maximumValue={3}
@@ -721,6 +735,7 @@ const renderItem = (data, rowMap) => (
         />
   <View style={styles.buttonContainer}>
     <TouchableOpacity
+      testID="addTaskConfirmButton"
       style={styles.saveButton}
       onPress={addTask}
     >
