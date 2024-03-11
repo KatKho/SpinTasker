@@ -1,7 +1,8 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor, debug } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor} from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen/HomeScreen';
 import { mockData as importedMockData } from './__mocks__/firebase';
+import { updateDoc } from './__mocks__/firebase';
 
 jest.mock('firebase/auth', () => ({
   getAuth: jest.fn(() => ({})),
@@ -122,4 +123,24 @@ describe('HomeScreen', () => {
       console.log("No tasks available for completion toggle.");
     }
   });
+
+  // Test: Opens Edit Task Modal on Button Press
+  it('opens the edit modal when the first edit button is pressed', async () => {
+    const { getAllByTestId, queryByTestId } = render(<HomeScreen navigation={{ navigate: jest.fn() }} route={{ params: { userId: '123' } }} />);
+  
+    await waitFor(() => expect(getAllByTestId('taskItem')).toBeTruthy());
+
+    const editButtons = getAllByTestId('editTaskButton');
+    if (editButtons.length > 0) {
+      fireEvent.press(editButtons[0]);
+  
+      await waitFor(() => {
+        expect(queryByTestId('taskEditModal')).toBeTruthy();
+      });
+    } else {
+      console.log("No edit buttons found");
+    }
+  });
+  
+
 });

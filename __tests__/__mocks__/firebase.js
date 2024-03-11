@@ -27,7 +27,7 @@ export const setDoc = jest.fn();
 export const collection = jest.fn();
 export const addDoc = jest.fn(() => {
   const newId = 'mock-doc-id'; 
-  mockData.push({
+  const newTask = {
     id: newId,
     data: () => ({
       name: 'New Task',
@@ -36,9 +36,11 @@ export const addDoc = jest.fn(() => {
       priority: 1,
       date: new Date().toISOString(),
     }),
-  });
-  return Promise.resolve({ id: newId });
+  };
+  mockData.push(newTask);
+  return Promise.resolve(newTask);
 });
+
 export const getDocs = jest.fn(() => Promise.resolve({ docs: mockData }));
 export const updateDoc = jest.fn((docRef, updatedFields) => {
   const docIndex = mockData.findIndex(doc => doc.id === docRef.id);
