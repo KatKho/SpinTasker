@@ -4,3 +4,8 @@ import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/asy
 
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 global.alert = jest.fn();
+
+if (typeof window === 'undefined') {
+    global.window = {};
+    global.window.navigator = {};
+  }
