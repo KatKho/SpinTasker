@@ -142,5 +142,36 @@ describe('HomeScreen', () => {
     }
   });
   
+  // Test: Edits Task Details
+  it('edits a task', async () => {
+    const navigationMock = { navigate: jest.fn() };
+    const routeMock = { params: { userId: '123' } };
+    const { getByTestId, getAllByTestId, queryByTestId } = render(<HomeScreen navigation={navigationMock} route={routeMock} />);
 
+    await waitFor(() => expect(getAllByTestId('taskItem')).toBeTruthy());
+
+    const editButtons = getAllByTestId('editTaskButton');
+    if (editButtons.length > 0) {
+      fireEvent.press(editButtons[0]);
+
+      await waitFor(() => expect(queryByTestId('taskEditModal')).toBeTruthy());
+
+      const updatedName = 'Updated Task Name';
+      const updatedDescription = 'Updated Task Description';
+      const updatedPriority = 2;
+      fireEvent.changeText(getByTestId('taskNameInput'), updatedName);
+      fireEvent.changeText(getByTestId('taskDescriptionInput'), updatedDescription);
+      fireEvent(getByTestId('prioritySlider'), 'onValueChange', updatedPriority);
+
+      fireEvent.press(getByTestId('saveTaskButton'));
+
+      expect(updateDoc).toHaveBeenCalledWith(expect.anything(), {
+        name: updatedName,
+        description: updatedDescription,
+        priority: updatedPriority
+      });
+    } else {
+      console.log("No tasks available for editing.");
+    }
+  });
 });
