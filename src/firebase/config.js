@@ -14,7 +14,9 @@ const firebaseConfig = {
   appId: process.env.FIREBASE_APP_ID,
 };
 
-window.navigator.userAgent = "ReactNative";
+if (typeof window !== 'undefined') {
+  window.navigator.userAgent = 'ReactNative';
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
