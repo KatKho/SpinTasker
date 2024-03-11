@@ -5,3 +5,10 @@ jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 global.alert = jest.fn();
 
 global.window = global.window || { navigator: { userAgent: 'ReactNative' } };
+
+if (typeof setImmediate === 'undefined') {
+    global.setImmediate = (callback) => {
+      setTimeout(callback, 0);
+    };
+  }
+  
