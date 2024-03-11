@@ -17,5 +17,5 @@ module.exports = {
   ],
 
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.jsx'],
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
 };

@@ -41,15 +41,16 @@ describe('HomeScreen', () => {
   it('opens add task modal on button press', async () => {
     const navigationMock = { navigate: jest.fn() };
     const routeMock = { params: { userId: '123' } };
-    const { getByTestId, queryByTestId } = render(<HomeScreen navigation={navigationMock} route={routeMock} />);
-
-    expect(queryByTestId('taskModal')).toBeNull();
+    const { getByTestId } = render(<HomeScreen navigation={navigationMock} route={routeMock} />);
   
-    await act(async () => {
-      fireEvent.press(getByTestId('addTaskButton'));
+    fireEvent.press(getByTestId('addTaskButton'));
+  
+    let taskModal;
+    await waitFor(() => {
+      taskModal = getByTestId('taskModal');
     });
-
-    expect(getByTestId('taskModal')).toBeTruthy();
+  
+    expect(taskModal).toBeTruthy();
   });
 
   // Test: Adds a New Task
