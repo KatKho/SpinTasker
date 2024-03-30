@@ -2,8 +2,6 @@
 
 SpinTasker is a React Native mobile application that introduces a fun and interactive way to manage daily tasks. With a unique 'wheel of fortune' feature, users can let chance decide which task to tackle next.
 
-**Note:** This project is still under development.
-
 **Demo Account:** To experience SpinTasker without signing up, use the following test account:
 - **Email**: test@gmail.com
 - **Password**: test123
